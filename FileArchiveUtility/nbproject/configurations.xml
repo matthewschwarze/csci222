@@ -35,6 +35,22 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>/lib/x86_64-linux-gnu/mongo-client-install/include/</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibFileItem>/lib/x86_64-linux-gnu/mongo-client-install/lib/libmongoclient.a</linkerLibFileItem>
+            <linkerLibLibItem>boost_thread</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
+            <linkerLibLibItem>boost_system</linkerLibLibItem>
+            <linkerLibLibItem>boost_program_options</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -51,6 +67,12 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/lib/x86_64-linux-gnu/mongo-client-install/include/mongo</pElem>
+          </incDir>
+          <incFile>
+            <pElem>/lib/x86_64-linux-gnu/mongo-client-install/include/mongo</pElem>
+          </incFile>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
