@@ -6,7 +6,7 @@
  */
 
 #include <iostream>
-#include "version/dbtest.h"
+#include "version/fileArchiver.h"
 #include "mongo/client/dbclient.h"
 #include "mongo/bson/bson.h"
 
@@ -25,7 +25,7 @@ using mongo::BSONObjIterator;
 int main() {
     
     try {
-        dbtest db;
+        fileArchiver db;
         std::cout << "connected ok" << std::endl;
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;

@@ -36,9 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/versionDB/FileRec.o \
-	${OBJECTDIR}/versionDB/VersionRec.o \
-	${OBJECTDIR}/versionDB/dbtest.o
+	${OBJECTDIR}/version/fileArchiver.o
 
 
 # C Compiler Flags
@@ -72,20 +70,10 @@ ${OBJECTDIR}/main.o: main.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
-${OBJECTDIR}/versionDB/FileRec.o: versionDB/FileRec.cpp 
-	${MKDIR} -p ${OBJECTDIR}/versionDB
+${OBJECTDIR}/version/fileArchiver.o: version/fileArchiver.cpp 
+	${MKDIR} -p ${OBJECTDIR}/version
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionDB/FileRec.o versionDB/FileRec.cpp
-
-${OBJECTDIR}/versionDB/VersionRec.o: versionDB/VersionRec.cpp 
-	${MKDIR} -p ${OBJECTDIR}/versionDB
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionDB/VersionRec.o versionDB/VersionRec.cpp
-
-${OBJECTDIR}/versionDB/dbtest.o: versionDB/dbtest.cpp 
-	${MKDIR} -p ${OBJECTDIR}/versionDB
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionDB/dbtest.o versionDB/dbtest.cpp
+	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/fileArchiver.o version/fileArchiver.cpp
 
 # Subprojects
 .build-subprojects:
