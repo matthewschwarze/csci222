@@ -6,7 +6,7 @@
  */
 
 #include <iostream>
-#include "versionDB/dbtest.h"
+#include "version/dbtest.h"
 #include "mongo/client/dbclient.h"
 #include "mongo/bson/bson.h"
 
