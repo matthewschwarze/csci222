@@ -28,19 +28,29 @@ fileArchiver::fileArchiver() {
 }
 
 bool fileArchiver::differs(string filename) {
-      /* auto_ptr<mongo::DBClientCursor> cursor =
-                conn.query("tutorial.persons", MONGO_QUERY("id" << filename));
-        while (cursor->more()) {
-            BSONObj p = cursor->next();
-            cout << p.getStringField("name") << endl;
-        } */
+    auto_ptr<mongo::DBClientCursor> cursor =
+            conn.query("fs.files", MONGO_QUERY("filename" << filename));
+    while (cursor->more()) {
+        BSONObj p = cursor->next();
+        cout << p.getStringField("filename") << endl;
+    }
 }
 
 bool fileArchiver::exists(string filename) {
-
+    auto_ptr<mongo::DBClientCursor> cursor =
+            conn.query("fs.files", MONGO_QUERY("filename" << filename));
+    if (cursor->more()) {
+        return true;
+    } else {
+        return false;
+    }
 }
-/*
-void fileArchiver::insertNew(string, string);
+
+
+void fileArchiver::insertNew(string filename, string comment){
+    
+ }
+ /*
 void fileArchiver::update(string, string);
 void fileArchiver::retriveVersion(int, string, string);
 float fileArchiver::getCurrentVersionNumber(string);
@@ -48,7 +58,7 @@ string fileArchiver::getHashOfLastSaved(string);
 bool fileArchiver::getComment(string, int);
 //vector<versionInfo> fileArchiver::getVersioninfo(std::string);
 void fileArchiver::setReference(string, int, string);
-*/
+ */
 
 fileArchiver::~fileArchiver() {
 }
