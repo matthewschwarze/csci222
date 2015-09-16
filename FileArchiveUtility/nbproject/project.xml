@@ -11,6 +11,7 @@
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>versionD</sourceRootElem>
+                <sourceRootElem>versionDB</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
