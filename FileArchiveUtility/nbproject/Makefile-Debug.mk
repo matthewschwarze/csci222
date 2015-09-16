@@ -35,7 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/main.o
+	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/versionD/dbtest.o
 
 
 # C Compiler Flags
@@ -68,6 +69,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/versionD/dbtest.o: versionD/dbtest.cpp 
+	${MKDIR} -p ${OBJECTDIR}/versionD
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionD/dbtest.o versionD/dbtest.cpp
 
 # Subprojects
 .build-subprojects:
