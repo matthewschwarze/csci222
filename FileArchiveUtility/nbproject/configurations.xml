@@ -12,6 +12,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>version/fileArchiver.cpp</itemPath>
+      <itemPath>version/fileArchiver.h</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -26,8 +28,6 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
     <itemPath>version/dbproperties.txt</itemPath>
-    <itemPath>version/fileArchiver.cpp</itemPath>
-    <itemPath>version/fileArchiver.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>versionD</Elem>

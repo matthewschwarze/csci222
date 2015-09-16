@@ -9,6 +9,7 @@
 #define	FILEARCHIVER_H
 #include "mongo/client/dbclient.h"
 #include "mongo/bson/bson.h"
+#include "mongo/client/dbclientcursor.h"
 
 class fileArchiver {
 private:
