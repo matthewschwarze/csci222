@@ -36,9 +36,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/versionDB/FileRec.o \
-	${OBJECTDIR}/versionDB/VersionRec.o \
-	${OBJECTDIR}/versionDB/dbtest.o
+	${OBJECTDIR}/version/FileRec.o \
+	${OBJECTDIR}/version/VersionRec.o \
+	${OBJECTDIR}/version/dbtest.o
 
 
 # C Compiler Flags
@@ -72,20 +72,20 @@ ${OBJECTDIR}/main.o: main.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
-${OBJECTDIR}/versionDB/FileRec.o: versionDB/FileRec.cpp 
-	${MKDIR} -p ${OBJECTDIR}/versionDB
+${OBJECTDIR}/version/FileRec.o: version/FileRec.cpp 
+	${MKDIR} -p ${OBJECTDIR}/version
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionDB/FileRec.o versionDB/FileRec.cpp
+	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/FileRec.o version/FileRec.cpp
 
-${OBJECTDIR}/versionDB/VersionRec.o: versionDB/VersionRec.cpp 
-	${MKDIR} -p ${OBJECTDIR}/versionDB
+${OBJECTDIR}/version/VersionRec.o: version/VersionRec.cpp 
+	${MKDIR} -p ${OBJECTDIR}/version
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionDB/VersionRec.o versionDB/VersionRec.cpp
+	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/VersionRec.o version/VersionRec.cpp
 
-${OBJECTDIR}/versionDB/dbtest.o: versionDB/dbtest.cpp 
-	${MKDIR} -p ${OBJECTDIR}/versionDB
+${OBJECTDIR}/version/dbtest.o: version/dbtest.cpp 
+	${MKDIR} -p ${OBJECTDIR}/version
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/versionDB/dbtest.o versionDB/dbtest.cpp
+	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/dbtest.o version/dbtest.cpp
 
 # Subprojects
 .build-subprojects:
