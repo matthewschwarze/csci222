@@ -48,8 +48,11 @@ bool fileArchiver::exists(string filename) {
 
 
 void fileArchiver::insertNew(string filename, string comment){
-    
- }
+    mongo::GridFS gfs(conn, "fileRecords");//get a gridfs connection to the database, fileRecords is the name "table"
+    gfs. = 1024 * 256;
+
+    mongo::BSONObj result = gfs.storeFile(filename);
+}
  /*
 void fileArchiver::update(string, string);
 void fileArchiver::retriveVersion(int, string, string);
