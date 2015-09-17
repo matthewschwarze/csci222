@@ -2,10 +2,12 @@
 #define _VERSIONREC_H_
 
 #include <vector>
+#include <string>
 #include <time.h>
-#include "hash.h"
+#include <mongo/client/dbclient.h>
 
-typedef int HashType;
+typedef std::string HashType;
+const int BLOCK_SIZE = 4096;
 
 struct VersionDiffBlock {
 	int blockNo;

@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <Qt/qfile.h>
+#include <Qt/qbytearray.h>
 
 #include "FileRec.h"
 using namespace std;
@@ -11,8 +13,6 @@ using namespace std;
 FileRec::FileRec():
 	length(0),
 	versionCount(0),
-	origHash(0),
-	recentHash(0),
 	refNum(0)
 {
 	modifytime.tv_sec = 0;
@@ -51,11 +51,11 @@ int FileRec::getReferenceVersion() const {
 	return refNum;
 }
 
-vector<int>::iterator FileRec::getBlocksBegin() {
+vector<HashType>::iterator FileRec::getBlocksBegin() {
 	return blockhashes.begin();
 }
 
-vector<int>::iterator FileRec::getBlocksEnd() {
+vector<HashType>::iterator FileRec::getBlocksEnd() {
 	return blockhashes.end();
 }
 
@@ -107,15 +107,15 @@ void FileRec::setReferenceVersion(int x) {
 	refNum = x;
 }
 
-void FileRec::appendBlocks(int hash) {
+void FileRec::appendBlock(HashType hash) {
 	blockhashes.push_back(hash);
 }
 
-void FileRec::appendVersionIDs(int v) {
+void FileRec::appendVersionID(int v) {
 	versions.push_back(v);
 }
 
-void FileRec::appendComments(string c) {
+void FileRec::appendComment(string c) {
 	comments.push_back(c);
 }
 
