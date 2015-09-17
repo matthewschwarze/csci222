@@ -4,8 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <Qt/qfile.h>
-#include <Qt/qbytearray.h>
+#include "FileHash.h"
 
 #include "FileRec.h"
 using namespace std;
@@ -146,7 +145,9 @@ void FileRec::createData(string filename) {
 	timespec modtime;
 	modtime.tv_sec = filedata.st_mtime;
 	setModTime(modtime);
-	//setHashLatest();
+        
+        string strHash = hash_md5(filename);
+	setHashLatest(strHash);
 	
 	
 }
