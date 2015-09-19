@@ -25,6 +25,7 @@
         <itemPath>version/VersionRec.cpp</itemPath>
         <itemPath>version/fileArchiver.cpp</itemPath>
       </logicalFolder>
+      <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -39,8 +40,6 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>versionD</Elem>
-    <Elem>versionDB</Elem>
     <Elem>version</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
@@ -68,9 +67,13 @@
             <linkerLibLibItem>boost_program_options</linkerLibLibItem>
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>QtCore</linkerLibLibItem>
+            <linkerLibLibItem>QtGui</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="version/FileHash.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="version/FileHash.h" ex="false" tool="3" flavor2="0">
@@ -116,6 +119,8 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="version/FileHash.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="version/FileHash.h" ex="false" tool="3" flavor2="0">

@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/version/FileHash.o \
 	${OBJECTDIR}/version/FileRec.o \
 	${OBJECTDIR}/version/VersionRec.o \
@@ -55,7 +56,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=/lib/x86_64-linux-gnu/mongo-client-install/lib/libmongoclient.a -lboost_thread -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex -lpthread
+LDLIBSOPTIONS=/lib/x86_64-linux-gnu/mongo-client-install/lib/libmongoclient.a -lboost_thread -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex -lpthread -lQtCore -lQtGui
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -66,6 +67,11 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility: /lib/x86_64-linux
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/main.o: main.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -I/usr/include/qt4 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/version/FileHash.o: version/FileHash.cpp 
 	${MKDIR} -p ${OBJECTDIR}/version
