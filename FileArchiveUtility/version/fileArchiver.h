@@ -11,6 +11,11 @@
 #include "mongo/bson/bson.h"
 #include "mongo/client/dbclientcursor.h"
 #include "mongo/client/gridfs.h"
+#include <boost/filesystem.hpp>
+#include "FileRec.h"
+#include <iostream>
+#include <fstream>
+#include <string>
 
 class fileArchiver {
 private:
