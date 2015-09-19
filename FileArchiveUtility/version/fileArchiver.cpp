@@ -28,30 +28,59 @@ fileArchiver::fileArchiver() {
 }
 
 bool fileArchiver::differs(string filename) {
+    
+    //create a filerec object, populate with data
+    
+    //retrieve filerec's that match its filename (pk))
     auto_ptr<mongo::DBClientCursor> cursor =
-            conn.query("fs.files", MONGO_QUERY("filename" << filename));
-    while (cursor->more()) {
+            conn.query("fileRecords.fs.files", MONGO_QUERY("filename" << filename)); //change to query filerec
+    if(cursor->more()) {
         BSONObj p = cursor->next();
-        cout << p.getStringField("filename") << endl;
+        //cout <<"hash of file " <<p.getStringField("md5") << endl;
+        //compare with hash just got from db
+        //if the same return false as they do not differ
     }
 }
 
 bool fileArchiver::exists(string filename) {
+    //check for the existance of a filerec with same name
+    /*
     auto_ptr<mongo::DBClientCursor> cursor =
-            conn.query("fs.files", MONGO_QUERY("filename" << filename));
+            conn.query("fileRecords.fs.files", MONGO_QUERY("filename" << filename));
     if (cursor->more()) {
+        cout << " no insert" << endl;
         return true;
     } else {
         return false;
     }
+     */
 }
 
+void fileArchiver::createZipFile(const std::string& localfile, std::string& tempname) {
+    //std::string command = "/bin/gzip -c ";    
+    std::string command = "/bin/cp ";
+
+
+    command.append(localfile);
+    //command.append(" > ");
+    command.append(" "+ tempname );
+
+    system(command.c_str());
+}
 
 void fileArchiver::insertNew(string filename, string comment){
     mongo::GridFS gfs(conn, "fileRecords");//get a gridfs connection to the database, fileRecords is the name "table"
-    gfs. = 1024 * 256;
-
-    mongo::BSONObj result = gfs.storeFile(filename);
+    gfs.setChunkSize(1024 * 4); //4kb chunck sizes
+    
+    std::string tempname = tempnam("/tmp", "ARKIV");
+    createZipFile(filename, tempname);
+    
+    mongo::BSONObj result = gfs.storeFile(tempname);
+    //store the file name in the filerec object as well as other data
+   
+    unlink(tempname.c_str());
+    
+    
 }
  /*
 void fileArchiver::update(string, string);
