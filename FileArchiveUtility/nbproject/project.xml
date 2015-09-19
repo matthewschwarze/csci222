@@ -12,6 +12,7 @@
             <sourceRootList>
                 <sourceRootElem>versionD</sourceRootElem>
                 <sourceRootElem>versionDB</sourceRootElem>
+                <sourceRootElem>version</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
