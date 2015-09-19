@@ -28,19 +28,61 @@ fileArchiver::fileArchiver() {
 }
 
 bool fileArchiver::differs(string filename) {
-      /* auto_ptr<mongo::DBClientCursor> cursor =
-                conn.query("tutorial.persons", MONGO_QUERY("id" << filename));
-        while (cursor->more()) {
-            BSONObj p = cursor->next();
-            cout << p.getStringField("name") << endl;
-        } */
+    
+    //create a filerec object, populate with data
+    
+    //retrieve filerec's that match its filename (pk))
+    auto_ptr<mongo::DBClientCursor> cursor =
+            conn.query("fileRecords.fs.files", MONGO_QUERY("filename" << filename)); //change to query filerec
+    if(cursor->more()) {
+        BSONObj p = cursor->next();
+        //cout <<"hash of file " <<p.getStringField("md5") << endl;
+        //compare with hash just got from db
+        //if the same return false as they do not differ
+    }
 }
 
 bool fileArchiver::exists(string filename) {
-
+    //check for the existance of a filerec with same name
+    /*
+    auto_ptr<mongo::DBClientCursor> cursor =
+            conn.query("fileRecords.fs.files", MONGO_QUERY("filename" << filename));
+    if (cursor->more()) {
+        cout << " no insert" << endl;
+        return true;
+    } else {
+        return false;
+    }
+     */
 }
-/*
-void fileArchiver::insertNew(string, string);
+
+void fileArchiver::createZipFile(const std::string& localfile, std::string& tempname) {
+    //std::string command = "/bin/gzip -c ";    
+    std::string command = "/bin/cp ";
+
+
+    command.append(localfile);
+    //command.append(" > ");
+    command.append(" "+ tempname );
+
+    system(command.c_str());
+}
+
+void fileArchiver::insertNew(string filename, string comment){
+    mongo::GridFS gfs(conn, "fileRecords");//get a gridfs connection to the database, fileRecords is the name "table"
+    gfs.setChunkSize(1024 * 4); //4kb chunck sizes
+    
+    std::string tempname = tempnam("/tmp", "ARKIV");
+    createZipFile(filename, tempname);
+    
+    mongo::BSONObj result = gfs.storeFile(tempname);
+    //store the file name in the filerec object as well as other data
+   
+    unlink(tempname.c_str());
+    
+    
+}
+ /*
 void fileArchiver::update(string, string);
 void fileArchiver::retriveVersion(int, string, string);
 float fileArchiver::getCurrentVersionNumber(string);
@@ -48,7 +90,7 @@ string fileArchiver::getHashOfLastSaved(string);
 bool fileArchiver::getComment(string, int);
 //vector<versionInfo> fileArchiver::getVersioninfo(std::string);
 void fileArchiver::setReference(string, int, string);
-*/
+ */
 
 fileArchiver::~fileArchiver() {
 }

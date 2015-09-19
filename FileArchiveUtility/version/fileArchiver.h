@@ -10,11 +10,12 @@
 #include "mongo/client/dbclient.h"
 #include "mongo/bson/bson.h"
 #include "mongo/client/dbclientcursor.h"
+#include "mongo/client/gridfs.h"
 
 class fileArchiver {
 private:
     mongo::DBClientConnection conn;
-    //void cretaeZipFile();
+    void createZipFile(const std::string &,std::string&);
     //void unZip();
     //applyDelta()
 public:

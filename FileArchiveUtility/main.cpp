@@ -27,9 +27,14 @@ int main() {
     try {
         fileArchiver db;
         std::cout << "connected ok" << std::endl;
+        std::string tmp = "version/fileArchiver.cpp";    
+            db.insertNew(tmp, tmp);
+        
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;
     }
+    
+    
     return EXIT_SUCCESS;
 }
 
