@@ -5,7 +5,12 @@
 #include <string>
 #include <vector>
 #include <time.h>
-#include <mongo/client/dbclient.h>
+#include "mongo/client/dbclient.h"
+#include "mongo/bson/bson.h"
+#include "mongo/client/dbclientcursor.h"
+#include "mongo/client/gridfs.h"
+#include <boost/filesystem.hpp>
+
 
 typedef std::string HashType;
 
@@ -84,9 +89,9 @@ class FileRec {
 		
 		void createData(std::string filename);
 		
-		void readFromDB(mongo::DBClientConnection conn, std::string filename);
+		void readFromDB(mongo::DBClientConnection&, std::string filename);
 		
-		void writeToDB(mongo::DBClientConnection conn);
+		void writeToDB(mongo::DBClientConnection&);
 		
 		//-- Overloaded Operators --//
 		bool operator==(const FileRec& other);

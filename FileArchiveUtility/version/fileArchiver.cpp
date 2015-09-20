@@ -94,7 +94,8 @@ void fileArchiver::insertNew(string filename, string comment) {
 
     int numBlocks = result.getIntField("length") / result.getIntField("chunkSize") + (result.getIntField("length") % result.getIntField("chunkSize") != 0);
     record.setBlockCount(numBlocks);
-
+    record.setReferenceVersion(0); //first version as it is insert new
+    record.setVersionNum(1);
     //long long v;
     //result.getField("uploadDate").numberLong();
     timespec modtime;
@@ -102,7 +103,7 @@ void fileArchiver::insertNew(string filename, string comment) {
     record.setModTime(modtime);
 
     record.setHashOriginal(result.getStringField("md5"));
-
+    record.setHashLatest(result.getStringField("md5"));
     /*auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.files", MONGO_QUERY("_id" << mongo::OID(id)));
     if (cursor->more()) {
         BSONObj p = cursor->next();
@@ -116,13 +117,13 @@ void fileArchiver::insertNew(string filename, string comment) {
         BSONElement binData = p.getField("data");
         int leng;
         string data = binData.binData(leng);
-        cout << data << endl;
         string hash = hash_md5_data(data);
         cout << hash << endl;
         record.appendBlock(hash);
     }
 
     cout << "file name " << record.getFilename() << endl;
+    cout << "version number " << record.getReferenceVersion();
     cout << "blob id " << record.getBlobName() << endl;
     cout << "number of blocks " << record.getBlockCount() << endl;
     cout << "date (incorrect) " << record.getModTime().tv_sec << endl;
@@ -130,9 +131,15 @@ void fileArchiver::insertNew(string filename, string comment) {
     cout << "hash of blocks " << endl;
     for (vector<string>::iterator it = record.getBlocksBegin(); it != record.getBlocksEnd(); ++it)
         cout << *it << endl;
+ 
+    cout << "comments " << endl;
+    for (vector<string>::iterator it = record.getCommentsBegin(); it != record.getCommentsEnd(); ++it)
+        cout << *it << endl;
     cout << endl;
 
     unlink(tempname.c_str());
+    
+    record.writeToDB(conn);
 
 
 }
