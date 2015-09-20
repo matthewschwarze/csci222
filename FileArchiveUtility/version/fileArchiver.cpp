@@ -79,15 +79,36 @@ void fileArchiver::insertNew(string filename, string comment) {
     //store the file name in the filerec object as well as other data
     FileRec record;
 
-    boost::filesystem::path p(filename);
+    boost::filesystem::path p(filename); //get filename from path
     string path(p.filename().c_str());
-    record.setFilename(path);
+    record.setFilename(path); 
     record.appendComment(comment);
-    record.setBlobName(result.getField("_id").toString());
     
-    cout << "file name " << record.getFilename() << endl; 
+    string test = result.getField("_id"); //get id from db
+    string id;
+    boost::tokenizer<> tok(test); //need to break up id as it is in the form "id: objectid('grgrfrbgryrgr')"
+    for ( boost::tokenizer<>::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+       id = *beg; //last iteration should be the actual id
+    }
+    record.setBlobName(id); //set id
+    int numBlocks = result.getIntField("length") / result.getIntField("chunkSize") + (result.getIntField("length") % result.getIntField("chunkSize") != 0);
     
-    cout << "blob id " << record.getBlobName() << endl; 
+    record.setBlockCount(numBlocks);
+    cout << result.getField("uploadDate") << endl;
+    
+    //record.setModTime();
+
+    /*auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.files", MONGO_QUERY("_id" << mongo::OID(id)));
+    if (cursor->more()) {
+        BSONObj p = cursor->next();
+
+        cout << "db filename " << p.getStringField("filename") << endl;
+
+    } */
+
+    cout << "file name " << record.getFilename() << endl;
+    cout << "blob id " << record.getBlobName() << endl;
+    cout << "number of blocks " << record.getBlockCount() << endl;
 
     unlink(tempname.c_str());
 

@@ -12,10 +12,12 @@
 #include "mongo/client/dbclientcursor.h"
 #include "mongo/client/gridfs.h"
 #include <boost/filesystem.hpp>
+#include <boost/tokenizer.hpp>
 #include "FileRec.h"
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <time.h>
 
 class fileArchiver {
 private:
