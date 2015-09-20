@@ -123,7 +123,7 @@ void fileArchiver::insertNew(string filename, string comment) {
     }
 
     cout << "file name " << record.getFilename() << endl;
-    cout << "version number " << record.getReferenceVersion();
+    cout << "version number " << record.getReferenceVersion() << endl;
     cout << "blob id " << record.getBlobName() << endl;
     cout << "number of blocks " << record.getBlockCount() << endl;
     cout << "date (incorrect) " << record.getModTime().tv_sec << endl;

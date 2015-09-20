@@ -134,14 +134,13 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     record.append("currentversion", this->refNum);
     mongo::BSONArray arr;
     mongo::BSONArrayBuilder bArr;
-
     for (vector<string>::iterator it = blockhashes.begin(); it != blockhashes.end(); ++it){
         //record.append("$push" << BSON("FileBlkHashes" << *it));
         arr = BSON_ARRAY(*it);
         bArr.append(arr);
     }
 
-    record.append("FileBlkHashes", arr);
+    record.append("FileBlkHashes", bArr.arr());
     BSONObj result = record.obj();
     conn.insert("test.Filerec", result);
 }
