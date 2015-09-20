@@ -11,6 +11,7 @@
 #include <string>
 
 std::string hash_md5(std::string filename);
+std::string hash_md5_data(std::string data);
 
 #endif	/* FILEHASH_H */
 

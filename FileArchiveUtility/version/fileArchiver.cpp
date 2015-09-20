@@ -81,20 +81,20 @@ void fileArchiver::insertNew(string filename, string comment) {
 
     boost::filesystem::path p(filename); //get filename from path
     string path(p.filename().c_str());
-    record.setFilename(path); 
+    record.setFilename(path);
     record.appendComment(comment);
-    
+
     string test = result.getField("_id"); //get id from db
     string id;
     boost::tokenizer<> tok(test); //need to break up id as it is in the form "id: objectid('grgrfrbgryrgr')"
-    for ( boost::tokenizer<>::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
-       id = *beg; //last iteration should be the actual id
+    for (boost::tokenizer<>::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+        id = *beg; //last iteration should be the actual id
     }
     record.setBlobName(id); //set id
-    
+
     int numBlocks = result.getIntField("length") / result.getIntField("chunkSize") + (result.getIntField("length") % result.getIntField("chunkSize") != 0);
     record.setBlockCount(numBlocks);
-   
+
     //long long v;
     //result.getField("uploadDate").numberLong();
     timespec modtime;
@@ -102,7 +102,7 @@ void fileArchiver::insertNew(string filename, string comment) {
     record.setModTime(modtime);
 
     record.setHashOriginal(result.getStringField("md5"));
-    
+
     /*auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.files", MONGO_QUERY("_id" << mongo::OID(id)));
     if (cursor->more()) {
         BSONObj p = cursor->next();
@@ -110,22 +110,27 @@ void fileArchiver::insertNew(string filename, string comment) {
         cout << "db filename " << p.getStringField("filename") << endl;
 
     } */
-    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks" , MONGO_QUERY("files_id" << mongo::OID(id)).sort("n:1"));
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(id)));
     while (cursor->more()) {
         BSONObj p = cursor->next();
-       BSONElement binData =  p.getField("data");
-       int leng;
-       string data = binData.binData(leng);
-       
-
+        BSONElement binData = p.getField("data");
+        int leng;
+        string data = binData.binData(leng);
+        cout << data << endl;
+        string hash = hash_md5_data(data);
+        cout << hash << endl;
+        record.appendBlock(hash);
     }
-    
 
     cout << "file name " << record.getFilename() << endl;
     cout << "blob id " << record.getBlobName() << endl;
     cout << "number of blocks " << record.getBlockCount() << endl;
     cout << "date (incorrect) " << record.getModTime().tv_sec << endl;
     cout << "hash of file " << record.getHashOriginal() << endl;
+    cout << "hash of blocks " << endl;
+    for (vector<string>::iterator it = record.getBlocksBegin(); it != record.getBlocksEnd(); ++it)
+        cout << *it << endl;
+    cout << endl;
 
     unlink(tempname.c_str());
 

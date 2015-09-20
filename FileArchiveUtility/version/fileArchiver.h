@@ -14,10 +14,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 #include "FileRec.h"
+#include "FileHash.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <time.h>
+#include <vector>
 
 class fileArchiver {
 private:
