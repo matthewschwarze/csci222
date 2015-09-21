@@ -10,64 +10,69 @@ typedef std::string HashType;
 const int BLOCK_SIZE = 4096;
 
 struct VersionDiffBlock {
-	int blockNo;
-	HashType blockHash;
-	int blockLen;
-	char blockArr[BLOCK_SIZE];
+    int blockNo;
+    HashType blockHash;
+    int blockLen;
+    char blockArr[BLOCK_SIZE];
 };
 
 class VersionRec {
-	private:
-		int versionid;
-		int versionnumber;
-		int length;
-		timespec modifytime;
-		HashType filehash;
-		std::vector<VersionDiffBlock> changes;
-		
-	public:
-	
-		//---- Constructors / Destructors ----//
-		VersionRec();
-		
-		//---- Accessor Functions ----//
-		int getVersionID() const;
-		
-		int getVersionNumber() const;
-		
-		int getLength() const;
-		
-		timespec getModifyTime() const;
-		
-		HashType getFileHash() const;
-		
-		std::vector<VersionDiffBlock>::iterator getChangesBegin();
-		
-		std::vector<VersionDiffBlock>::iterator getChangesEnd();
-		
-		//---- Mutator Functions ----//
-		void setVersionID(int v);
-		
-		void setVersionNumber(int n);
-		
-		void setLength(int l);
-		
-		void setModifyTime(timespec t);
-		
-		void setFilehash(HashType h);
+private:
+    int versionid;
+    int versionnumber;
+    int length;
+    std::string tmpname;
+    timespec modifytime;
+    HashType filehash;
+    std::vector<VersionDiffBlock> changes;
 
-		void changesAppend(VersionDiffBlock b);
-		
-		//---- Read / Writing Functions ----//
-		void readFromDB(mongo::DBClientConnection conn, int vid);
-		
-		void writeToDB(mongo::DBClientConnection conn);
-		
-		//---- Overloaded Operators ----//
-		bool operator==(const VersionRec& other);
-		
-		bool operator!=(const VersionRec& other);
-		
+public:
+
+    //---- Constructors / Destructors ----//
+    VersionRec();
+
+    //---- Accessor Functions ----//
+    std::string gettmpname() const;
+
+    int getVersionID() const;
+
+    int getVersionNumber() const;
+
+    int getLength() const;
+
+    timespec getModifyTime() const;
+
+    HashType getFileHash() const;
+
+    std::vector<VersionDiffBlock>::iterator getChangesBegin();
+
+    std::vector<VersionDiffBlock>::iterator getChangesEnd();
+
+    //---- Mutator Functions ----//
+    void settmpname(std::string t);
+
+    void setVersionID(int v);
+
+    void setVersionNumber(int n);
+
+    void setLength(int l);
+
+    void setModifyTime(timespec t);
+
+    void setFilehash(HashType h);
+
+    void changesAppend(VersionDiffBlock b);
+
+    //---- Read / Writing Functions ----//
+    void readFromDB(mongo::DBClientConnection conn, int vid);
+
+    void writeToDB(mongo::DBClientConnection conn);
+
+    //---- Overloaded Operators ----//
+    bool operator==(const VersionRec& other);
+
+    bool operator!=(const VersionRec& other);
+
 };
 
 #endif

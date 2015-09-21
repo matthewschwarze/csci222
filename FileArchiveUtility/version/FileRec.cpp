@@ -61,11 +61,11 @@ vector<HashType>::iterator FileRec::getBlocksEnd() {
     return blockhashes.end();
 }
 
-vector<int>::iterator FileRec::getVersionIDsBegin() {
+vector<VersionRec>::iterator FileRec::getVersionBegin() {
     return versions.begin();
 }
 
-vector<int>::iterator FileRec::getVersionIDsEnd() {
+vector<VersionRec>::iterator FileRec::getVersionEnd() {
     return versions.end();
 }
 
@@ -113,12 +113,16 @@ void FileRec::appendBlock(HashType hash) {
     blockhashes.push_back(hash);
 }
 
-void FileRec::appendVersionID(int v) {
+void FileRec::appendVersion(VersionRec v) {
     versions.push_back(v);
 }
 
 void FileRec::appendComment(string c) {
     comments.push_back(c);
+}
+
+void FileRec::readFromDB(DBClientConnection& conn, string filename){
+
 }
 
 void FileRec::writeToDB(mongo::DBClientConnection &conn) {
@@ -127,22 +131,44 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     record.append("Tempname", this->tempname);
     record.append("curhash", this->recentHash);
     record.append("ovhash", this->origHash);
-    record.append("length", this->length); //maybe change to file length
+    record.append("length", this->length);
     record.append("nversions", this->versionCount);
-    // record.append("Mtnsec", this->modifytime.tv_nsec);
-    // record.append("mtsec", this->modifytime.tv_sec);
+    record.append("Mtnsec", 0);
+    record.append("mtsec", 0);
     record.append("currentversion", this->refNum);
-    mongo::BSONArray arr;
+
     mongo::BSONArrayBuilder bArr;
-    for (vector<string>::iterator it = blockhashes.begin(); it != blockhashes.end(); ++it){
+    mongo::BSONArrayBuilder Comments;
+    for (vector<string>::iterator it = blockhashes.begin(); it != blockhashes.end(); ++it) {
         //record.append("$push" << BSON("FileBlkHashes" << *it));
-        arr = BSON_ARRAY(*it);
-        bArr.append(arr);
+        bArr.append(*it);
+    }
+
+    for (vector<string>::iterator it = comments.begin(); it != comments.end(); ++it) {
+        //record.append("$push" << BSON("FileBlkHashes" << *it));
+        BSONObjBuilder comment;
+        comment.append("version", 0); //think about converting from string to struct
+        comment.append("comment", *it);
+        Comments.append(comment.obj());
+    }
+
+    if (!versions.empty()) {
+        mongo::BSONArrayBuilder Version;
+        for (vector<VersionRec>::iterator it = versions.begin(); it != versions.end(); ++it) {
+            //record.append("$push" << BSON("FileBlkHashes" << *it));
+            BSONObjBuilder version;
+            //get the transformed to BSONobj version record
+            Version.append(version.obj());
+
+        }
+        record.append("versionRec", Version.arr());
     }
 
     record.append("FileBlkHashes", bArr.arr());
+
+    record.append("comments", Comments.arr());
     BSONObj result = record.obj();
-    conn.insert("test.Filerec", result);
+    conn.insert("fileRecords.Filerec", result);
 }
 
 void FileRec::createData(string filename) {

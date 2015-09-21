@@ -39,6 +39,7 @@ public:
     std::string getHashOfLastSaved(std::string);
     bool getComment(std::string, int);
     //vector<versionInfo> getVersioninfo(std::string);
+    FileRec* getDetailsOfLastSaved(std::string);
     void setReference(std::string, int, std::string);
     ~fileArchiver();
 

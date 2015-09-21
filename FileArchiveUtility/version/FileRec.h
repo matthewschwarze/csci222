@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <time.h>
+#include "VersionRec.h"
 #include "mongo/client/dbclient.h"
 #include "mongo/bson/bson.h"
 #include "mongo/client/dbclientcursor.h"
@@ -25,7 +26,7 @@ class FileRec {
 		HashType recentHash;
 		int refNum;
 		std::vector<HashType> blockhashes;
-		std::vector<int> versions;
+		std::vector<VersionRec> versions;
 		std::vector<std::string> comments;
 	
 	public:
@@ -54,9 +55,9 @@ class FileRec {
 
 		std::vector<HashType>::iterator getBlocksEnd();
 		
-		std::vector<int>::iterator getVersionIDsBegin();
+		std::vector<VersionRec>::iterator getVersionBegin();
 		
-		std::vector<int>::iterator getVersionIDsEnd();
+		std::vector<VersionRec>::iterator getVersionEnd();
 		
 		std::vector<std::string>::iterator getCommentsBegin();
 		
@@ -81,7 +82,7 @@ class FileRec {
 				
 		void appendBlock(HashType hash);
 				
-		void appendVersionID(int v);
+		void appendVersion(VersionRec v);
 				
 		void appendComment(std::string c);
 		

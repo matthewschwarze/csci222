@@ -28,31 +28,32 @@ fileArchiver::fileArchiver() {
 
 bool fileArchiver::differs(string filename) {
 
-    //create a filerec object, populate with data
+    boost::filesystem::path p(filename); //get filename from path
+    string file(p.filename().c_str());
+    string hash = hash_md5(filename);
 
-    //retrieve filerec's that match its filename (pk))
     auto_ptr<mongo::DBClientCursor> cursor =
-            conn.query("fileRecords.fs.files", MONGO_QUERY("filename" << filename)); //change to query filerec
+            conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file << "curhash" << hash)); //change to query filerec
     if (cursor->more()) {
-        BSONObj p = cursor->next();
-        //cout <<"hash of file " <<p.getStringField("md5") << endl;
-        //compare with hash just got from db
-        //if the same return false as they do not differ
+        return false;
+    } else {
+        return true;
     }
 }
 
 bool fileArchiver::exists(string filename) {
     //check for the existance of a filerec with same name
-    /*
+    boost::filesystem::path p(filename); //get filename from path
+    string file(p.filename().c_str());
     auto_ptr<mongo::DBClientCursor> cursor =
-            conn.query("fileRecords.fs.files", MONGO_QUERY("filename" << filename));
+            conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file));
+
     if (cursor->more()) {
-        cout << " no insert" << endl;
         return true;
     } else {
         return false;
     }
-     */
+
 }
 
 void fileArchiver::createZipFile(const std::string& localfile, std::string& tempname) {
@@ -92,8 +93,8 @@ void fileArchiver::insertNew(string filename, string comment) {
     }
     record.setBlobName(id); //set id
 
-    int numBlocks = result.getIntField("length") / result.getIntField("chunkSize") + (result.getIntField("length") % result.getIntField("chunkSize") != 0);
-    record.setBlockCount(numBlocks);
+    //int numBlocks = result.getIntField("length") / result.getIntField("chunkSize") + (result.getIntField("length") % result.getIntField("chunkSize") != 0);
+    record.setBlockCount(result.getIntField("length"));
     record.setReferenceVersion(0); //first version as it is insert new
     record.setVersionNum(1);
     //long long v;
@@ -125,23 +126,28 @@ void fileArchiver::insertNew(string filename, string comment) {
     cout << "file name " << record.getFilename() << endl;
     cout << "version number " << record.getReferenceVersion() << endl;
     cout << "blob id " << record.getBlobName() << endl;
-    cout << "number of blocks " << record.getBlockCount() << endl;
+    cout << "length of file " << record.getBlockCount() << endl;
     cout << "date (incorrect) " << record.getModTime().tv_sec << endl;
     cout << "hash of file " << record.getHashOriginal() << endl;
     cout << "hash of blocks " << endl;
     for (vector<string>::iterator it = record.getBlocksBegin(); it != record.getBlocksEnd(); ++it)
         cout << *it << endl;
- 
+
     cout << "comments " << endl;
     for (vector<string>::iterator it = record.getCommentsBegin(); it != record.getCommentsEnd(); ++it)
         cout << *it << endl;
     cout << endl;
 
     unlink(tempname.c_str());
-    
+
     record.writeToDB(conn);
 
 
+}
+
+FileRec* fileArchiver::getDetailsOfLastSaved(string filename){
+    FileRec* record  = new FileRec;
+    record->readFromDB(conn, filename);
 }
 
 /*
