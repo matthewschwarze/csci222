@@ -14,6 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 #include "FileRec.h"
+#include "VersionRec.h"
 #include "FileHash.h"
 #include <iostream>
 #include <fstream>

@@ -12,6 +12,10 @@
 #include "mongo/client/gridfs.h"
 #include <boost/filesystem.hpp>
 
+struct comment{
+    int version;
+    std::string comment;
+};
 
 typedef std::string HashType;
 
@@ -27,7 +31,7 @@ class FileRec {
 		int refNum;
 		std::vector<HashType> blockhashes;
 		std::vector<VersionRec> versions;
-		std::vector<std::string> comments;
+		std::vector<comment> comments;
 	
 	public:
 	
@@ -59,9 +63,9 @@ class FileRec {
 		
 		std::vector<VersionRec>::iterator getVersionEnd();
 		
-		std::vector<std::string>::iterator getCommentsBegin();
+		std::vector<comment>::iterator getCommentsBegin();
 		
-		std::vector<std::string>::iterator getCommentsEnd();
+		std::vector<comment>::iterator getCommentsEnd();
 		
 		//---- Mutator Functions ----//
 		void setFilename(const std::string& s);
@@ -84,7 +88,7 @@ class FileRec {
 				
 		void appendVersion(VersionRec v);
 				
-		void appendComment(std::string c);
+		void appendComment(comment c);
 		
 		//---- Reading / Writing Functions ----//
 		
@@ -94,6 +98,7 @@ class FileRec {
 		
 		void writeToDB(mongo::DBClientConnection&);
 		
+                void clearBlockHashes();
 		//-- Overloaded Operators --//
 		bool operator==(const FileRec& other);
 		

@@ -69,11 +69,11 @@ vector<VersionRec>::iterator FileRec::getVersionEnd() {
     return versions.end();
 }
 
-vector<string>::iterator FileRec::getCommentsBegin() {
+vector<comment>::iterator FileRec::getCommentsBegin() {
     return comments.begin();
 }
 
-vector<string>::iterator FileRec::getCommentsEnd() {
+vector<comment>::iterator FileRec::getCommentsEnd() {
     return comments.end();
 }
 
@@ -117,8 +117,12 @@ void FileRec::appendVersion(VersionRec v) {
     versions.push_back(v);
 }
 
-void FileRec::appendComment(string c) {
+void FileRec::appendComment(comment c) {
     comments.push_back(c);
+}
+
+void FileRec::clearBlockHashes(){
+    blockhashes.clear();
 }
 
 void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
@@ -146,57 +150,48 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
         for (vector<BSONElement>::iterator it = hashes.begin(); it != hashes.end(); ++it) {
             appendBlock((*it).String());
         }
-
-        mongo::BSONObjIterator comment(record.getObjectField("comments"));
-        while (comment.more()) {
-            mongo::BSONElement fileentry = comment.next();
-            cout << " hi" << endl;
-            std::string w1 = fileentry.String();
-            //std::string w2 = fileentry.String();
-            cout << w1 << endl;
+        
+        
+        vector<BSONElement> array = record["comments"].Array();
+        for (vector<BSONElement>::iterator ar = array.begin(); ar != array.end(); ++ar) {
+            BSONObj commentdata = ar->Obj();
+            BSONElement version = commentdata.getField("version");
+            BSONElement commentdb = commentdata.getField("comment");
+            
+            comment data;
+            data.comment = commentdb.String();
+            data.version = version.Int();
+            appendComment(data);
         }
 
-        //mongo::BSONObj comments = record.getField("comments").embeddedObject();
-        //for (vector<BSONObj>::iterator it = comments.begin(); it != comments.end(); ++it) {
-        //cout << comments.firstElement().String() << endl;
-        //appendComment((*it).String()); 
-        // cout << (*it).String() << endl;
-        // }
-
-        /* 
-         mongo::BSONArrayBuilder bArr;
-         mongo::BSONArrayBuilder Comments;
-         for (vector<string>::iterator it = blockhashes.begin(); it != blockhashes.end(); ++it) {
-             //record.append("$push" << BSON("FileBlkHashes" << *it));
-             bArr.append(*it);
-         }
-
-         for (vector<string>::iterator it = comments.begin(); it != comments.end(); ++it) {
-             //record.append("$push" << BSON("FileBlkHashes" << *it));
-             BSONObjBuilder comment;
-             comment.append("version", 0); //think about converting from string to struct
-             comment.append("comment", *it);
-             Comments.append(comment.obj());
-         }
-
-         if (!versions.empty()) {
-             mongo::BSONArrayBuilder Version;
-             for (vector<VersionRec>::iterator it = versions.begin(); it != versions.end(); ++it) {
-                 //record.append("$push" << BSON("FileBlkHashes" << *it));
-                 BSONObjBuilder version;
-                 //get the transformed to BSONobj version record
-                 Version.append(version.obj());
-
-             }
-             record.append("versionRec", Version.arr());
-         }
-
-         record.append("FileBlkHashes", bArr.arr());
-
-         record.append("comments", Comments.arr());
-         BSONObj result = record.obj();
         
-         */
+        if (record.getBoolField("versionrec")) {
+             vector<BSONElement> array = record["versionrec"].Array();
+             for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
+                 VersionRec VR;
+                 
+                 BSONObj versionRecord = it->Obj();
+                 BSONElement version = versionRecord.getField("version");
+                 cout << versionRecord.getField("version").toString() << endl;
+                 BSONElement length = versionRecord.getField("Length");
+                 BSONElement timem = versionRecord.getField("Mtsec");
+                 BSONElement timemn = versionRecord.getField("mtnsec");
+                 BSONElement hash = versionRecord.getField("Ovhash");
+                 BSONElement tempname = versionRecord.getField("tempname"); //remove once version record works
+                 timespec time;
+                 time.tv_nsec = timemn.Int();
+                 time.tv_sec = timem.Int();
+                 
+                 VR.setFilehash(hash.String());
+                 VR.setLength(length.Int());
+                 VR.setModifyTime(time);
+                 VR.setVersionNumber(version.Int());
+                 VR.settmpname(tempname.String());
+                 
+                 appendVersion(VR);
+                 //implement the hash structure here
+             }
+         }
     }
 }
 
@@ -219,11 +214,11 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
         bArr.append(*it);
     }
 
-    for (vector<string>::iterator it = comments.begin(); it != comments.end(); ++it) {
+    for (vector<comment>::iterator it = comments.begin(); it != comments.end(); ++it) {
         //record.append("$push" << BSON("FileBlkHashes" << *it));
         BSONObjBuilder comment;
-        comment.append("version", 0); //think about converting from string to struct
-        comment.append("comment", *it);
+        comment.append("version", it->version); //think about converting from string to struct
+        comment.append("comment", it->comment);
         Comments.append(comment.obj());
     }
 

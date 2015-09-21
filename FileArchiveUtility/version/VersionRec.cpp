@@ -1,13 +1,15 @@
 #include "VersionRec.h"
 using namespace std;
 
-VersionRec::VersionRec() :
-versionid(0),
-versionnumber(0),
-length(0),
-filehash(0) {
+VersionRec::VersionRec() {
+
+    versionid = 0;
+    versionnumber = 0;
+    length = 0;
+    filehash = " ";
     modifytime.tv_sec = 0;
     modifytime.tv_nsec = 0;
+
 }
 
 int VersionRec::getVersionID() const {
