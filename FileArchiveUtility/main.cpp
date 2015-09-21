@@ -35,6 +35,7 @@ int main() {
             if(db.differs(tmp)){
                // db.update(tmp, comment);
                 cout << "they are different" << endl;
+                db.update(tmp, comment);
             }
             else{
                 std::cout << "they are not different" << endl;

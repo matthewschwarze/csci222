@@ -150,8 +150,11 @@ FileRec* fileArchiver::getDetailsOfLastSaved(string filename){
     record->readFromDB(conn, filename);
 }
 
+
+void fileArchiver::update(string filename, string comment){
+    FileRec* Origrecord = getDetailsOfLastSaved(filename);
+}
 /*
-void fileArchiver::update(string, string);
 void fileArchiver::retriveVersion(int, string, string);
 float fileArchiver::getCurrentVersionNumber(string);
 string fileArchiver::getHashOfLastSaved(string);
