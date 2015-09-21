@@ -233,7 +233,7 @@ void fileArchiver::update(string filename, string commentp) {
 
     unlink(tempname.c_str());
 
-   // Origrecord->writeToDB(conn);
+    Origrecord->writeToDB(conn);
      
 }
 

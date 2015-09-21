@@ -228,17 +228,34 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
             //record.append("$push" << BSON("FileBlkHashes" << *it));
             BSONObjBuilder version;
             //get the transformed to BSONobj version record
+            version.append("version", (*it).getVersionNumber());
+            version.append("Length", (*it).getLength());
+            int i = (*it).getModifyTime().tv_sec;
+            version.append("Mtsec", i);
+            i = (*it).getModifyTime().tv_nsec;
+            version.append("mtnsec", i);
+            version.append("Ovhash", (*it).getFileHash());
+            version.append("tempname", (*it).gettmpname());
+            
             Version.append(version.obj());
+            
 
         }
-        record.append("versionRec", Version.arr());
+        record.append("versionrec", Version.arr());
     }
 
     record.append("FileBlkHashes", bArr.arr());
-
     record.append("comments", Comments.arr());
+    
     BSONObj result = record.obj();
-    conn.insert("fileRecords.Filerec", result);
+    conn.update("fileRecords.Filerec",MONGO_QUERY("filename" << filename), result);
+   // conn.insert("fileRecords.Filerec", result);
+   string e = conn.getLastError();
+    if (!e.empty()) {
+        cout << "update failed: " << e << std::endl;
+        sleep(1);
+        exit(1);
+    } 
 }
 
 void FileRec::createData(string filename) {
