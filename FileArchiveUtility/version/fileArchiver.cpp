@@ -56,7 +56,19 @@ bool fileArchiver::exists(string filename) {
 
 }
 
-void fileArchiver::createZipFile(const std::string& localfile, std::string& tempname) {
+void fileArchiver::createZipFile(const string& localfile, string& tempname) {
+    //std::string command = "/bin/gzip -c ";    
+    std::string command = "/bin/cp ";
+
+
+    command.append(localfile);
+    //command.append(" > ");
+    command.append(" " + tempname);
+
+    system(command.c_str());
+}
+
+void fileArchiver::unZipFile(const string& localfile, string& tempname) {
     //std::string command = "/bin/gzip -c ";    
     std::string command = "/bin/cp ";
 
@@ -117,7 +129,6 @@ void fileArchiver::insertNew(string filename, string commentp) {
         int leng;
         string data = binData.binData(leng);
         string hash = hash_md5_data(data);
-        cout << hash << endl;
         record.appendBlock(hash);
     }
 
@@ -164,12 +175,12 @@ void fileArchiver::update(string filename, string commentp) {
     newV.setVersionNumber(Origrecord->getReferenceVersion());
     Origrecord->setVersionNum(Origrecord->getVersionNum() + 1);
     Origrecord->setReferenceVersion(Origrecord->getVersionNum() - 1);
-    
+
     //set up blkhashes into the version class
-    
+
     Origrecord->clearBlockHashes();
-    
-    
+    Origrecord->appendVersion(newV);
+
     mongo::GridFS gfs(conn, "fileRecords"); //get a gridfs connection to the database, fileRecords is the name "table"
     gfs.setChunkSize(1024 * 4); //4kb chunck sizes
 
@@ -185,7 +196,7 @@ void fileArchiver::update(string filename, string commentp) {
 
     comment data;
     data.comment = commentp;
-    data.version = Origrecord->getReferenceVersion(); 
+    data.version = Origrecord->getReferenceVersion();
     Origrecord->appendComment(data);
 
     string test = result.getField("_id"); //get id from db
@@ -230,16 +241,63 @@ void fileArchiver::update(string filename, string commentp) {
     for (vector<comment>::iterator it = Origrecord->getCommentsBegin(); it != Origrecord->getCommentsEnd(); ++it)
         cout << it->version << " " << it->comment << endl;
 
-
     unlink(tempname.c_str());
 
     Origrecord->writeToDB(conn);
-     
+    delete Origrecord;
+
 }
 
-/*
-void fileArchiver::retriveVersion(int, string, string);
-float fileArchiver::getCurrentVersionNumber(string);
+void fileArchiver::retriveVersion(int version, string filename, string retrived) {
+    FileRec* Origrecord = getDetailsOfLastSaved(filename);
+
+    bool found = false;
+    string fileRef;
+    if (Origrecord->getReferenceVersion() == version) {
+        fileRef = Origrecord->getBlobName();
+        found = true;
+    } else {
+        for (vector<VersionRec>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
+            if ((*it).getVersionNumber() == version) {
+                found = true;
+                fileRef = (*it).gettmpname();
+            }
+        }
+    }
+    if (!found) { //work out a way to send a did not find version
+        cout << "not found" << endl;
+        delete Origrecord;
+        return;
+    }
+    std::string tempname = tempnam("/tmp", "ARKIV");
+    fstream tmpfile;
+    tmpfile.open(tempname.c_str(), ios::out | ios::binary);
+    if (tmpfile.good()) {
+        auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(fileRef)));
+        while (cursor->more()) {
+            cout << "getting blocks" << endl;
+            BSONObj p = cursor->next();
+            BSONElement binData = p.getField("data");
+            int leng;
+            string data = binData.binData(leng);
+            tmpfile.write((char*) data.c_str(), leng);
+        }
+
+        tmpfile.close();
+        retrived += Origrecord->getFilename();
+        unZipFile(tempname, retrived);
+
+        unlink(tempname.c_str());
+        delete Origrecord;
+
+    } else {
+        delete Origrecord;
+        return;
+    }
+
+}
+
+/* float fileArchiver::getCurrentVersionNumber(string);
 string fileArchiver::getHashOfLastSaved(string);
 bool fileArchiver::getComment(string, int);
 //vector<versionInfo> fileArchiver::getVersioninfo(std::string);
@@ -247,5 +305,6 @@ void fileArchiver::setReference(string, int, string);
  */
 
 fileArchiver::~fileArchiver() {
+    //close connection
 }
 

@@ -121,7 +121,7 @@ void FileRec::appendComment(comment c) {
     comments.push_back(c);
 }
 
-void FileRec::clearBlockHashes(){
+void FileRec::clearBlockHashes() {
     blockhashes.clear();
 }
 
@@ -150,48 +150,50 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
         for (vector<BSONElement>::iterator it = hashes.begin(); it != hashes.end(); ++it) {
             appendBlock((*it).String());
         }
-        
-        
+
+
         vector<BSONElement> array = record["comments"].Array();
         for (vector<BSONElement>::iterator ar = array.begin(); ar != array.end(); ++ar) {
             BSONObj commentdata = ar->Obj();
             BSONElement version = commentdata.getField("version");
             BSONElement commentdb = commentdata.getField("comment");
-            
+
             comment data;
             data.comment = commentdb.String();
             data.version = version.Int();
             appendComment(data);
         }
 
-        
-        if (record.getBoolField("versionrec")) {
-             vector<BSONElement> array = record["versionrec"].Array();
-             for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
-                 VersionRec VR;
-                 
-                 BSONObj versionRecord = it->Obj();
-                 BSONElement version = versionRecord.getField("version");
-                 cout << versionRecord.getField("version").toString() << endl;
-                 BSONElement length = versionRecord.getField("Length");
-                 BSONElement timem = versionRecord.getField("Mtsec");
-                 BSONElement timemn = versionRecord.getField("mtnsec");
-                 BSONElement hash = versionRecord.getField("Ovhash");
-                 BSONElement tempname = versionRecord.getField("tempname"); //remove once version record works
-                 timespec time;
-                 time.tv_nsec = timemn.Int();
-                 time.tv_sec = timem.Int();
-                 
-                 VR.setFilehash(hash.String());
-                 VR.setLength(length.Int());
-                 VR.setModifyTime(time);
-                 VR.setVersionNumber(version.Int());
-                 VR.settmpname(tempname.String());
-                 
-                 appendVersion(VR);
-                 //implement the hash structure here
-             }
-         }
+
+        if (record.hasElement("versionrec")) {
+            vector<BSONElement> array = record["versionrec"].Array();
+            for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
+                VersionRec VR;
+
+                BSONObj versionRecord = it->Obj();
+                BSONElement version = versionRecord.getField("version");
+                cout << versionRecord.getField("version").toString() << endl;
+                BSONElement length = versionRecord.getField("Length");
+                BSONElement timem = versionRecord.getField("Mtsec");
+                BSONElement timemn = versionRecord.getField("mtnsec");
+                BSONElement hash = versionRecord.getField("Ovhash");
+                BSONElement tempname = versionRecord.getField("tempname"); //remove once version record works
+                timespec time;
+                time.tv_nsec = timemn.Int();
+                time.tv_sec = timem.Int();
+
+                VR.setFilehash(hash.String());
+                VR.setLength(length.Int());
+                VR.setModifyTime(time);
+                VR.setVersionNumber(version.Int());
+                VR.settmpname(tempname.String());
+
+                appendVersion(VR);
+                //implement the hash structure here
+            }
+        }else{
+            cout << "no other versions" << endl;
+        }
     }
 }
 
@@ -223,6 +225,7 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     }
 
     if (!versions.empty()) {
+        cout << "why am i here" << endl;
         mongo::BSONArrayBuilder Version;
         for (vector<VersionRec>::iterator it = versions.begin(); it != versions.end(); ++it) {
             //record.append("$push" << BSON("FileBlkHashes" << *it));
@@ -236,9 +239,9 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
             version.append("mtnsec", i);
             version.append("Ovhash", (*it).getFileHash());
             version.append("tempname", (*it).gettmpname());
-            
+
             Version.append(version.obj());
-            
+
 
         }
         record.append("versionrec", Version.arr());
@@ -246,16 +249,22 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
 
     record.append("FileBlkHashes", bArr.arr());
     record.append("comments", Comments.arr());
-    
+
     BSONObj result = record.obj();
-    conn.update("fileRecords.Filerec",MONGO_QUERY("filename" << filename), result);
-   // conn.insert("fileRecords.Filerec", result);
-   string e = conn.getLastError();
+
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << filename));
+    if (cursor->more()) {
+        conn.update("fileRecords.Filerec", MONGO_QUERY("filename" << filename), result);
+    } else {
+        conn.insert("fileRecords.Filerec", result);
+    }
+
+    string e = conn.getLastError();
     if (!e.empty()) {
-        cout << "update failed: " << e << std::endl;
+        cout << "something failed failed: " << e << std::endl;
         sleep(1);
         exit(1);
-    } 
+    }
 }
 
 void FileRec::createData(string filename) {

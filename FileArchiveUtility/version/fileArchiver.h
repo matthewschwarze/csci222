@@ -26,6 +26,7 @@ class fileArchiver {
 private:
     mongo::DBClientConnection conn;
     void createZipFile(const std::string &,std::string&);
+    void unZipFile(const std::string &,std::string&);
     //void unZip();
     //applyDelta()
 public:
