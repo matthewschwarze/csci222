@@ -3,7 +3,7 @@ using namespace std;
 
 VersionRec::VersionRec() {
 
-    versionid = 0;
+    versionid = "";
     versionnumber = 0;
     length = 0;
     filehash = " ";
@@ -12,7 +12,7 @@ VersionRec::VersionRec() {
 
 }
 
-int VersionRec::getVersionID() const {
+std::string VersionRec::getVersionID() const {
     return versionid;
 }
 
@@ -48,7 +48,7 @@ void VersionRec::settmpname(string t) {
     tmpname = t;
 }
 
-void VersionRec::setVersionID(int v) {
+void VersionRec::setVersionID(std::string v) {
     versionid = v;
 }
 

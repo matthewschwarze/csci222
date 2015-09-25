@@ -18,7 +18,7 @@ struct VersionDiffBlock {
 
 class VersionRec {
 private:
-    int versionid;
+    std::string versionid;
     int versionnumber;
     int length;
     std::string tmpname;
@@ -34,7 +34,7 @@ public:
     //---- Accessor Functions ----//
     std::string gettmpname() const;
 
-    int getVersionID() const;
+    std::string getVersionID() const;
 
     int getVersionNumber() const;
 
@@ -51,7 +51,7 @@ public:
     //---- Mutator Functions ----//
     void settmpname(std::string t);
 
-    void setVersionID(int v);
+    void setVersionID(std::string v);
 
     void setVersionNumber(int n);
 

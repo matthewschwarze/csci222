@@ -30,7 +30,7 @@ class FileRec {
 		HashType recentHash;
 		int refNum;
 		std::vector<HashType> blockhashes;
-		std::vector<VersionRec> versions;
+		std::vector<std::string> versions;
 		std::vector<comment> comments;
 	
 	public:
@@ -59,9 +59,9 @@ class FileRec {
 
 		std::vector<HashType>::iterator getBlocksEnd();
 		
-		std::vector<VersionRec>::iterator getVersionBegin();
+		std::vector<std::string>::iterator getVersionBegin();
 		
-		std::vector<VersionRec>::iterator getVersionEnd();
+		std::vector<std::string>::iterator getVersionEnd();
 		
 		std::vector<comment>::iterator getCommentsBegin();
 		
@@ -86,7 +86,7 @@ class FileRec {
 				
 		void appendBlock(HashType hash);
 				
-		void appendVersion(VersionRec v);
+		void appendVersion(std::string v);
 				
 		void appendComment(comment c);
 		

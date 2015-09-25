@@ -29,7 +29,7 @@ int main() {
         std::cout << "connected ok" << std::endl;
         std::string tmp = "version/fileArchiver.cpp";  
         std::string comment = "version 1 ";
-      /*  if(db.exists(tmp)){
+        if(db.exists(tmp)){
             std::cout << "already exists" << std::endl;
             //call differs
             if(db.differs(tmp)){
@@ -42,10 +42,11 @@ int main() {
             }
         }else{
             db.insertNew(tmp, comment);
-        } */
-        tmp = "fileArchiver.cpp";
-        comment = "~/";
-        db.retriveVersion(0, tmp, comment);
+        } 
+       // tmp = "fileArchiver.cpp";
+       // comment = "~/";
+       // db.retriveVersion(3, tmp, comment);
+       // db.removeVersion(3, tmp);
         
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;

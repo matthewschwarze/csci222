@@ -37,12 +37,14 @@ public:
     void insertNew(std::string, std::string);
     void update(std::string, std::string);
     void retriveVersion(int, std::string, std::string);
-    float getCurrentVersionNumber(std::string);
+    int getCurrentVersionNumber(std::string);
     std::string getHashOfLastSaved(std::string);
     bool getComment(std::string, int);
     //vector<versionInfo> getVersioninfo(std::string);
     FileRec* getDetailsOfLastSaved(std::string);
+    std::vector<VersionRec> getVersioninfo(std::string);
     void setReference(std::string, int, std::string);
+    void removeVersion(int, std::string);
     ~fileArchiver();
 
 

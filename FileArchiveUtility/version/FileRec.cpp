@@ -61,11 +61,11 @@ vector<HashType>::iterator FileRec::getBlocksEnd() {
     return blockhashes.end();
 }
 
-vector<VersionRec>::iterator FileRec::getVersionBegin() {
+vector<std::string>::iterator FileRec::getVersionBegin() {
     return versions.begin();
 }
 
-vector<VersionRec>::iterator FileRec::getVersionEnd() {
+vector<std::string>::iterator FileRec::getVersionEnd() {
     return versions.end();
 }
 
@@ -113,7 +113,7 @@ void FileRec::appendBlock(HashType hash) {
     blockhashes.push_back(hash);
 }
 
-void FileRec::appendVersion(VersionRec v) {
+void FileRec::appendVersion(std::string v) {
     versions.push_back(v);
 }
 
@@ -168,11 +168,15 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
         if (record.hasElement("versionrec")) {
             vector<BSONElement> array = record["versionrec"].Array();
             for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
-                VersionRec VR;
-
+                
+                //do another query based on the id got from here
                 BSONObj versionRecord = it->Obj();
+                BSONElement id = versionRecord.getField("id");
+                
+                // VersionRec VR;
+                /* dont need this until i actually need to get the version info
+                auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerversion", MONGO_QUERY("_id" << file));
                 BSONElement version = versionRecord.getField("version");
-                cout << versionRecord.getField("version").toString() << endl;
                 BSONElement length = versionRecord.getField("Length");
                 BSONElement timem = versionRecord.getField("Mtsec");
                 BSONElement timemn = versionRecord.getField("mtnsec");
@@ -187,9 +191,9 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
                 VR.setModifyTime(time);
                 VR.setVersionNumber(version.Int());
                 VR.settmpname(tempname.String());
-
-                appendVersion(VR);
-                //implement the hash structure here
+                 */ 
+               // appendVersion(VR);
+                appendVersion(id.String());
             }
         }else{
             cout << "no other versions" << endl;
@@ -227,21 +231,21 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     if (!versions.empty()) {
         cout << "why am i here" << endl;
         mongo::BSONArrayBuilder Version;
-        for (vector<VersionRec>::iterator it = versions.begin(); it != versions.end(); ++it) {
+        for (vector<string>::iterator it = versions.begin(); it != versions.end(); ++it) {
             //record.append("$push" << BSON("FileBlkHashes" << *it));
             BSONObjBuilder version;
+            version.append("id", (*it));
             //get the transformed to BSONobj version record
-            version.append("version", (*it).getVersionNumber());
+          /*  version.append("version", (*it).getVersionNumber());
             version.append("Length", (*it).getLength());
             int i = (*it).getModifyTime().tv_sec;
             version.append("Mtsec", i);
             i = (*it).getModifyTime().tv_nsec;
             version.append("mtnsec", i);
             version.append("Ovhash", (*it).getFileHash());
-            version.append("tempname", (*it).gettmpname());
+            version.append("tempname", (*it).gettmpname()); */
 
             Version.append(version.obj());
-
 
         }
         record.append("versionrec", Version.arr());

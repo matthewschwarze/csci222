@@ -167,7 +167,11 @@ void fileArchiver::update(string filename, string commentp) {
     //load in new file, increment version count
     //delete current hashes
     VersionRec newV;
+    stringstream convert; // stream used for the conversion
 
+    convert << Origrecord->getFilename() << Origrecord->getReferenceVersion() << Origrecord->getBlockCount();
+    string idd = convert.str();
+    newV.setVersionID(idd /*mongo::GENOID*/);
     newV.setFilehash(Origrecord->getHashLatest());
     newV.settmpname(Origrecord->getBlobName());
     newV.setModifyTime(Origrecord->getModTime());
@@ -176,10 +180,13 @@ void fileArchiver::update(string filename, string commentp) {
     Origrecord->setVersionNum(Origrecord->getVersionNum() + 1);
     Origrecord->setReferenceVersion(Origrecord->getVersionNum() - 1);
 
+    // BSONObj versionrecord = VersionToBSON(newV);
     //set up blkhashes into the version class
 
     Origrecord->clearBlockHashes();
-    Origrecord->appendVersion(newV);
+    Origrecord->appendVersion(newV.getVersionID());
+
+    //write newV to database
 
     mongo::GridFS gfs(conn, "fileRecords"); //get a gridfs connection to the database, fileRecords is the name "table"
     gfs.setChunkSize(1024 * 4); //4kb chunck sizes
@@ -248,7 +255,29 @@ void fileArchiver::update(string filename, string commentp) {
 
 }
 
+void fileArchiver::removeVersion(int version, string filename) {
+    if (!exists(filename)) {
+        return;
+    }
+    FileRec* Origrecord = getDetailsOfLastSaved(filename);
+
+    if (Origrecord->getReferenceVersion() == version) {
+        cout << "delete the latest version" << endl;
+    } else {
+        /*for (vector<VersionRec>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
+            if ((*it).getVersionNumber() == version) {
+                cout << "deleting vector" << endl;
+                // it.((*it));
+            }
+        } */
+    }
+}
+
 void fileArchiver::retriveVersion(int version, string filename, string retrived) {
+    if (!exists(filename)) {
+        return;
+    }
+
     FileRec* Origrecord = getDetailsOfLastSaved(filename);
 
     bool found = false;
@@ -257,12 +286,12 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
         fileRef = Origrecord->getBlobName();
         found = true;
     } else {
-        for (vector<VersionRec>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
+        /*for (vector<VersionRec>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
             if ((*it).getVersionNumber() == version) {
                 found = true;
                 fileRef = (*it).gettmpname();
             }
-        }
+        } */ //get the id's iterate untill version match 
     }
     if (!found) { //work out a way to send a did not find version
         cout << "not found" << endl;
@@ -275,7 +304,6 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
     if (tmpfile.good()) {
         auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(fileRef)));
         while (cursor->more()) {
-            cout << "getting blocks" << endl;
             BSONObj p = cursor->next();
             BSONElement binData = p.getField("data");
             int leng;
@@ -297,10 +325,94 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
 
 }
 
-/* float fileArchiver::getCurrentVersionNumber(string);
-string fileArchiver::getHashOfLastSaved(string);
+int fileArchiver::getCurrentVersionNumber(string filename) {
+    boost::filesystem::path p(filename); //get filename from path
+    string file(p.filename().c_str());
+
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file));
+
+    if (cursor->more()) {
+        BSONObj record = cursor->next();
+        return record.getIntField("currentversion");
+    } else {
+        return -1;
+    }
+}
+
+string fileArchiver::getHashOfLastSaved(string filename) {
+    boost::filesystem::path p(filename); //get filename from path
+    string file(p.filename().c_str());
+
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file));
+
+    if (cursor->more()) {
+        BSONObj record = cursor->next();
+        return record.getStringField("curhash");
+    } else {
+        return file;
+    }
+}
+
+vector<VersionRec> fileArchiver::getVersioninfo(string filename) {
+    boost::filesystem::path p(filename); //get filename from path
+    string file(p.filename().c_str());
+
+    vector<VersionRec> versions;
+
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file));
+
+    if (cursor->more()) {
+        VersionRec VR;
+        BSONObj record = cursor->next();
+        if (record.hasElement("versionrec")) {
+            vector<BSONElement> array = record["versionrec"].Array();
+            for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
+
+                //do a sub query for the record
+
+                BSONObj versionRecord = it->Obj();
+                BSONElement version = versionRecord.getField("id");
+                string id = version.String();
+                auto_ptr<mongo::DBClientCursor> subcursor = conn.query("fileRecords.Fileversion", MONGO_QUERY("_id" << mongo::OID(id)));
+
+                BSONObj subversion = subcursor->next();
+                BSONElement versionnum = subversion.getField("version");
+                BSONElement length = subversion.getField("Length");
+                BSONElement timem = subversion.getField("Mtsec");
+                BSONElement timemn = subversion.getField("mtnsec");
+                timespec time;
+                time.tv_nsec = timemn.Int();
+                time.tv_sec = timem.Int();
+
+                VR.setLength(length.Int());
+                VR.setModifyTime(time);
+                VR.setVersionNumber(versionnum.Int());
+
+                versions.push_back(VR);
+                //VR = NULL;
+            }
+        } else {
+            cout << "no other versions" << endl;
+        }
+        //set up current version
+        BSONElement timem = record.getField("Mtsec");
+        BSONElement timemn = record.getField("mtnsec");
+        timespec time;
+        time.tv_nsec = timemn.Int();
+        time.tv_sec = timem.Int();
+
+        VR.setLength(record.getIntField("length"));
+        VR.setVersionNumber(record.getIntField("currentversion"));
+        VR.setModifyTime(time);
+        versions.push_back(VR);
+    } else {
+        return versions;
+    }
+}
+
+/*
 bool fileArchiver::getComment(string, int);
-//vector<versionInfo> fileArchiver::getVersioninfo(std::string);
+
 void fileArchiver::setReference(string, int, string);
  */
 
