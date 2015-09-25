@@ -4,7 +4,11 @@
 #include <vector>
 #include <string>
 #include <time.h>
-#include <mongo/client/dbclient.h>
+#include "mongo/client/dbclient.h"
+#include "mongo/bson/bson.h"
+#include "mongo/client/dbclientcursor.h"
+#include "mongo/client/gridfs.h"
+#include <boost/filesystem.hpp>
 
 typedef std::string HashType;
 const int BLOCK_SIZE = 4096;
@@ -64,9 +68,9 @@ public:
     void changesAppend(VersionDiffBlock b);
 
     //---- Read / Writing Functions ----//
-    void readFromDB(mongo::DBClientConnection conn, int vid);
+    void readFromDB(mongo::DBClientConnection &conn, std::string vid);
 
-    void writeToDB(mongo::DBClientConnection conn);
+    void writeToDB(mongo::DBClientConnection &conn);
 
     //---- Overloaded Operators ----//
     bool operator==(const VersionRec& other);

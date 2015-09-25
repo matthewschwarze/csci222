@@ -44,6 +44,7 @@ public:
     FileRec* getDetailsOfLastSaved(std::string);
     std::vector<VersionRec> getVersioninfo(std::string);
     void setReference(std::string, int, std::string);
+    void setVersionBlocks(FileRec, VersionRec &);
     void removeVersion(int, std::string);
     ~fileArchiver();
 

@@ -163,25 +163,22 @@ FileRec* fileArchiver::getDetailsOfLastSaved(string filename) {
 void fileArchiver::update(string filename, string commentp) {
     FileRec* Origrecord = getDetailsOfLastSaved(filename);
 
-    //create a version record and store the current record in it
-    //load in new file, increment version count
-    //delete current hashes
     VersionRec newV;
     stringstream convert; // stream used for the conversion
 
-    convert << Origrecord->getFilename() << Origrecord->getReferenceVersion() << Origrecord->getBlockCount();
-    string idd = convert.str();
-    newV.setVersionID(idd /*mongo::GENOID*/);
+    
     newV.setFilehash(Origrecord->getHashLatest());
     newV.settmpname(Origrecord->getBlobName());
     newV.setModifyTime(Origrecord->getModTime());
     newV.setLength(Origrecord->getBlockCount());
     newV.setVersionNumber(Origrecord->getReferenceVersion());
+    setVersionBlocks(*(Origrecord), newV); // get block hashes and bin data, store in the version
+    cout << "set id" << endl;
+    newV.writeToDB(conn);
+    cout << "set id" << endl;
+    
     Origrecord->setVersionNum(Origrecord->getVersionNum() + 1);
     Origrecord->setReferenceVersion(Origrecord->getVersionNum() - 1);
-
-    // BSONObj versionrecord = VersionToBSON(newV);
-    //set up blkhashes into the version class
 
     Origrecord->clearBlockHashes();
     Origrecord->appendVersion(newV.getVersionID());
@@ -286,12 +283,15 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
         fileRef = Origrecord->getBlobName();
         found = true;
     } else {
-        /*for (vector<VersionRec>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
-            if ((*it).getVersionNumber() == version) {
+        for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
+            VersionRec tmp;
+            cout << (*it) << endl;
+            tmp.readFromDB(conn, (*it));
+            if (tmp.getVersionNumber() == version) {
                 found = true;
-                fileRef = (*it).gettmpname();
+                fileRef = tmp.gettmpname();
             }
-        } */ //get the id's iterate untill version match 
+        } //get the id's iterate untill version match 
     }
     if (!found) { //work out a way to send a did not find version
         cout << "not found" << endl;
@@ -407,6 +407,17 @@ vector<VersionRec> fileArchiver::getVersioninfo(string filename) {
         versions.push_back(VR);
     } else {
         return versions;
+    }
+}
+
+void fileArchiver::setVersionBlocks(FileRec record, VersionRec &version) {
+    int i = 0;
+    for (vector<string>::iterator it = record.getBlocksBegin(); it != record.getBlocksEnd(); ++it) {
+        VersionDiffBlock tmp;
+        tmp.blockNo = i;
+        tmp.blockHash = (*it);
+        version.changesAppend(tmp);
+        i++;
     }
 }
 

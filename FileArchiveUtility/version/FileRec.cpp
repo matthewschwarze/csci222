@@ -169,30 +169,8 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
             vector<BSONElement> array = record["versionrec"].Array();
             for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
                 
-                //do another query based on the id got from here
                 BSONObj versionRecord = it->Obj();
-                BSONElement id = versionRecord.getField("id");
-                
-                // VersionRec VR;
-                /* dont need this until i actually need to get the version info
-                auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerversion", MONGO_QUERY("_id" << file));
-                BSONElement version = versionRecord.getField("version");
-                BSONElement length = versionRecord.getField("Length");
-                BSONElement timem = versionRecord.getField("Mtsec");
-                BSONElement timemn = versionRecord.getField("mtnsec");
-                BSONElement hash = versionRecord.getField("Ovhash");
-                BSONElement tempname = versionRecord.getField("tempname"); //remove once version record works
-                timespec time;
-                time.tv_nsec = timemn.Int();
-                time.tv_sec = timem.Int();
-
-                VR.setFilehash(hash.String());
-                VR.setLength(length.Int());
-                VR.setModifyTime(time);
-                VR.setVersionNumber(version.Int());
-                VR.settmpname(tempname.String());
-                 */ 
-               // appendVersion(VR);
+                BSONElement id = versionRecord.getField("id"); 
                 appendVersion(id.String());
             }
         }else{
@@ -235,15 +213,6 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
             //record.append("$push" << BSON("FileBlkHashes" << *it));
             BSONObjBuilder version;
             version.append("id", (*it));
-            //get the transformed to BSONobj version record
-          /*  version.append("version", (*it).getVersionNumber());
-            version.append("Length", (*it).getLength());
-            int i = (*it).getModifyTime().tv_sec;
-            version.append("Mtsec", i);
-            i = (*it).getModifyTime().tv_nsec;
-            version.append("mtnsec", i);
-            version.append("Ovhash", (*it).getFileHash());
-            version.append("tempname", (*it).gettmpname()); */
 
             Version.append(version.obj());
 
