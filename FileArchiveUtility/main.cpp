@@ -45,8 +45,8 @@ int main() {
         } */
         tmp = "fileArchiver.cpp";
         comment = "~/";
-        db.retriveVersion(1, tmp, comment);
-       // db.removeVersion(3, tmp);
+        //db.retriveVersion(1, tmp, comment);
+        db.removeVersion(0, tmp);
         
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;

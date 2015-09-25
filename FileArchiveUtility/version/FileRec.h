@@ -99,6 +99,7 @@ class FileRec {
 		void writeToDB(mongo::DBClientConnection&);
 		
                 void clearBlockHashes();
+                void clearVersions();
 		//-- Overloaded Operators --//
 		bool operator==(const FileRec& other);
 		

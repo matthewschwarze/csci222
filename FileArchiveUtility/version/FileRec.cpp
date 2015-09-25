@@ -125,6 +125,10 @@ void FileRec::clearBlockHashes() {
     blockhashes.clear();
 }
 
+void FileRec::clearVersions() {
+    versions.clear();
+}
+
 void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
 
     boost::filesystem::path p(filename); //get filename from path

@@ -247,16 +247,27 @@ void fileArchiver::removeVersion(int version, string filename) {
         return;
     }
     FileRec* Origrecord = getDetailsOfLastSaved(filename);
-
+    vector<string> VersionsToKeep;
     if (Origrecord->getReferenceVersion() == version) {
         cout << "delete the latest version" << endl;
     } else {
-        /*for (vector<VersionRec>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
-            if ((*it).getVersionNumber() == version) {
-                cout << "deleting vector" << endl;
-                // it.((*it));
+        for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
+            VersionRec tmp;
+            
+            auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.FileVersion", MONGO_QUERY("_id" << mongo::OID((*it)) << "Version" << version));
+            if (cursor->more()) {
+               
+                cout << "found version to delete " << (*it)<< endl;
+                //conn.fileRecords.FileVersion.remove( { _id : {mongo::OID((*it))} } );
             }
-        } */
+            else{
+                VersionsToKeep.push_back((*it));
+            }
+        } 
+        Origrecord->clearVersions();
+        for (vector<string>::iterator it = VersionsToKeep.begin(); it != VersionsToKeep.end(); ++it)
+            Origrecord->appendVersion((*it));
+        Origrecord->writeToDB(conn);
     }
 }
 
