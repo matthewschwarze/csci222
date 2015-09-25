@@ -27,8 +27,25 @@ int main() {
     try {
         fileArchiver db;
         std::cout << "connected ok" << std::endl;
-        std::string tmp = "version/fileArchiver.cpp";    
-            db.insertNew(tmp, tmp);
+        std::string tmp = "version/fileArchiver.cpp";  
+        std::string comment = "version 1 ";
+      /*  if(db.exists(tmp)){
+            std::cout << "already exists" << std::endl;
+            //call differs
+            if(db.differs(tmp)){
+               // db.update(tmp, comment);
+                cout << "they are different" << endl;
+                db.update(tmp, comment);
+            }
+            else{
+                std::cout << "they are not different" << endl;
+            }
+        }else{
+            db.insertNew(tmp, comment);
+        } */
+        tmp = "fileArchiver.cpp";
+        comment = "~/";
+        db.retriveVersion(0, tmp, comment);
         
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;

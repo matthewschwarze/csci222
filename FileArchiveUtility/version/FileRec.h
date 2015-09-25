@@ -5,7 +5,17 @@
 #include <string>
 #include <vector>
 #include <time.h>
-#include <mongo/client/dbclient.h>
+#include "VersionRec.h"
+#include "mongo/client/dbclient.h"
+#include "mongo/bson/bson.h"
+#include "mongo/client/dbclientcursor.h"
+#include "mongo/client/gridfs.h"
+#include <boost/filesystem.hpp>
+
+struct comment{
+    int version;
+    std::string comment;
+};
 
 typedef std::string HashType;
 
@@ -20,8 +30,8 @@ class FileRec {
 		HashType recentHash;
 		int refNum;
 		std::vector<HashType> blockhashes;
-		std::vector<int> versions;
-		std::vector<std::string> comments;
+		std::vector<VersionRec> versions;
+		std::vector<comment> comments;
 	
 	public:
 	
@@ -49,13 +59,13 @@ class FileRec {
 
 		std::vector<HashType>::iterator getBlocksEnd();
 		
-		std::vector<int>::iterator getVersionIDsBegin();
+		std::vector<VersionRec>::iterator getVersionBegin();
 		
-		std::vector<int>::iterator getVersionIDsEnd();
+		std::vector<VersionRec>::iterator getVersionEnd();
 		
-		std::vector<std::string>::iterator getCommentsBegin();
+		std::vector<comment>::iterator getCommentsBegin();
 		
-		std::vector<std::string>::iterator getCommentsEnd();
+		std::vector<comment>::iterator getCommentsEnd();
 		
 		//---- Mutator Functions ----//
 		void setFilename(const std::string& s);
@@ -76,18 +86,19 @@ class FileRec {
 				
 		void appendBlock(HashType hash);
 				
-		void appendVersionID(int v);
+		void appendVersion(VersionRec v);
 				
-		void appendComment(std::string c);
+		void appendComment(comment c);
 		
 		//---- Reading / Writing Functions ----//
 		
 		void createData(std::string filename);
 		
-		void readFromDB(mongo::DBClientConnection conn, std::string filename);
+		void readFromDB(mongo::DBClientConnection&, std::string filename);
 		
-		void writeToDB(mongo::DBClientConnection conn);
+		void writeToDB(mongo::DBClientConnection&);
 		
+                void clearBlockHashes();
 		//-- Overloaded Operators --//
 		bool operator==(const FileRec& other);
 		
