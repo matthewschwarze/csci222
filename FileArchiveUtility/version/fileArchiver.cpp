@@ -132,16 +132,6 @@ void fileArchiver::insertNew(string filename, string commentp) {
         record.appendBlock(hash);
     }
 
-    cout << "file name " << record.getFilename() << endl;
-    cout << "version number " << record.getReferenceVersion() << endl;
-    cout << "blob id " << record.getBlobName() << endl;
-    cout << "length of file " << record.getBlockCount() << endl;
-    cout << "date (incorrect) " << record.getModTime().tv_sec << endl;
-    cout << "hash of file " << record.getHashOriginal() << endl;
-    cout << "hash of blocks " << endl;
-    for (vector<string>::iterator it = record.getBlocksBegin(); it != record.getBlocksEnd(); ++it)
-        cout << *it << endl;
-
     cout << "comments " << endl;
     for (vector<comment>::iterator it = record.getCommentsBegin(); it != record.getCommentsEnd(); ++it)
         cout << it->version << " " << it->comment << endl;
@@ -285,11 +275,11 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
     } else {
         for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
             VersionRec tmp;
-            cout << (*it) << endl;
             tmp.readFromDB(conn, (*it));
             if (tmp.getVersionNumber() == version) {
                 found = true;
                 fileRef = tmp.gettmpname();
+                break;
             }
         } //get the id's iterate untill version match 
     }

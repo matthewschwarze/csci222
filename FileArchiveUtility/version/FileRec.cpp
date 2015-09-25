@@ -207,7 +207,6 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     }
 
     if (!versions.empty()) {
-        cout << "why am i here" << endl;
         mongo::BSONArrayBuilder Version;
         for (vector<string>::iterator it = versions.begin(); it != versions.end(); ++it) {
             //record.append("$push" << BSON("FileBlkHashes" << *it));
@@ -215,7 +214,6 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
             version.append("id", (*it));
 
             Version.append(version.obj());
-
         }
         record.append("versionrec", Version.arr());
     }
