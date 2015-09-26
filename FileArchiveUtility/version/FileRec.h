@@ -100,6 +100,7 @@ class FileRec {
 		
                 void clearBlockHashes();
                 void clearVersions();
+                void clearComments();
 		//-- Overloaded Operators --//
 		bool operator==(const FileRec& other);
 		

@@ -156,20 +156,18 @@ void fileArchiver::update(string filename, string commentp) {
     VersionRec newV;
     stringstream convert; // stream used for the conversion
 
-    
+
     newV.setFilehash(Origrecord->getHashLatest());
     newV.settmpname(Origrecord->getBlobName());
     newV.setModifyTime(Origrecord->getModTime());
     newV.setLength(Origrecord->getBlockCount());
     newV.setVersionNumber(Origrecord->getReferenceVersion());
     setVersionBlocks(*(Origrecord), newV); // get block hashes and bin data, store in the version
-    cout << "set id" << endl;
     newV.writeToDB(conn);
-    cout << "set id" << endl;
-    
-    Origrecord->setVersionNum(Origrecord->getVersionNum() + 1);
-    Origrecord->setReferenceVersion(Origrecord->getVersionNum() - 1);
 
+    Origrecord->setVersionNum(Origrecord->getVersionNum() + 1);
+    Origrecord->setReferenceVersion(Origrecord->getReferenceVersion() + 1);
+//woo
     Origrecord->clearBlockHashes();
     Origrecord->appendVersion(newV.getVersionID());
 
@@ -246,28 +244,59 @@ void fileArchiver::removeVersion(int version, string filename) {
     if (!exists(filename)) {
         return;
     }
-    FileRec* Origrecord = getDetailsOfLastSaved(filename);
-    vector<string> VersionsToKeep;
-    if (Origrecord->getReferenceVersion() == version) {
+    FileRec* Origrecord = getDetailsOfLastSaved(filename); //get latest version
+
+    vector<string> VersionsToKeep; //vector to store version id to keep
+    vector<comment> commentsToKeep; // vestor to store comments to keep
+
+    if (Origrecord->getReferenceVersion() == version) {//version to delete is current file rec record
         cout << "delete the latest version" << endl;
-    } else {
+        
+        
+        
+    } else {//is a stored version
+        //find comment belonging to that version
+        for (vector<comment>::iterator it = Origrecord->getCommentsBegin(); it != Origrecord->getCommentsEnd(); ++it) {
+            if ((*it).version != version)//keep comments 
+                commentsToKeep.push_back((*it));
+        }
+
         for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
-            VersionRec tmp;
-            
+            //look for the record that matches
             auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.FileVersion", MONGO_QUERY("_id" << mongo::OID((*it)) << "Version" << version));
-            if (cursor->more()) {
-               
-                cout << "found version to delete " << (*it)<< endl;
-                //conn.fileRecords.FileVersion.remove( { _id : {mongo::OID((*it))} } );
-            }
-            else{
+
+            if (cursor->more()) { //found version rec
+                VersionRec tmp;
+                tmp.readFromDB(conn, (*it)); //read it into memory
+                cout << "found version to delete " << (*it) << endl;
+                //query all of the file chunks and remove, replace with deleting the array of bin data if i get there 
+                auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(tmp.gettmpname())));
+
+                string filter = "fileRecords.fs.chunks";
+                while (cursor->more()) {
+                    BSONObj p = cursor->next();
+                    conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("files_id" << mongo::OID(tmp.gettmpname())));
+                }
+                //remove the file record, won't need if i implement only storing updates
+                filter = "fileRecords.fs.files";
+                conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("_id" << mongo::OID(tmp.gettmpname())));
+                //delete the Version rec
+                filter = "fileRecords.FileVersion";
+                conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("_id" << mongo::OID((*it))));
+                Origrecord->setVersionNum(Origrecord->getVersionNum() - 1);
+            } else {//add record id to version to keep
                 VersionsToKeep.push_back((*it));
             }
-        } 
-        Origrecord->clearVersions();
+        }
+        Origrecord->clearVersions(); //remove current collection
         for (vector<string>::iterator it = VersionsToKeep.begin(); it != VersionsToKeep.end(); ++it)
-            Origrecord->appendVersion((*it));
-        Origrecord->writeToDB(conn);
+            Origrecord->appendVersion((*it)); //add version ids to keep
+        //boogy man do da
+        Origrecord->clearComments(); //remove current collection
+        for (vector<comment>::iterator it = commentsToKeep.begin(); it != commentsToKeep.end(); ++it)
+            Origrecord->appendComment((*it)); //add comments to keep
+
+        Origrecord->writeToDB(conn); //write to the db
     }
 }
 

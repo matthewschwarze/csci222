@@ -28,7 +28,7 @@ int main() {
         fileArchiver db;
         std::cout << "connected ok" << std::endl;
         std::string tmp = "version/fileArchiver.cpp";  
-        std::string comment = "version 2 ";
+        std::string comment = "version 0 ";
        /* if(db.exists(tmp)){
             std::cout << "already exists" << std::endl;
             //call differs
@@ -46,7 +46,7 @@ int main() {
         tmp = "fileArchiver.cpp";
         comment = "~/";
         //db.retriveVersion(1, tmp, comment);
-        db.removeVersion(0, tmp);
+        db.removeVersion(1, tmp);
         
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;
