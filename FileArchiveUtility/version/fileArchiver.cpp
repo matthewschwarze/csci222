@@ -30,11 +30,13 @@ bool fileArchiver::differs(string filename) {
 
     boost::filesystem::path p(filename); //get filename from path
     string file(p.filename().c_str());
-    string hash = hash_md5(filename);
-
-    auto_ptr<mongo::DBClientCursor> cursor =
-            conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file << "curhash" << hash)); //change to query filerec
-    if (cursor->more()) {
+    std::string tempname = tempnam("/tmp", "ARKIV");
+    createZipFile(filename, tempname);
+    
+    string hash = hash_md5(tempname);
+    unlink(tempname.c_str());
+    auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << file << "curhash" << hash)); //change to query filerec
+    if (cursor->more()) {     
         return false;
     } else {
         return true;
@@ -115,6 +117,7 @@ void fileArchiver::insertNew(string filename, string commentp) {
     timespec modtime;
     modtime.tv_nsec = v;
     modtime.tv_sec = v / 1000;
+    record.setModTime(modtime);
 
     record.setHashOriginal(result.getStringField("md5"));
     record.setHashLatest(result.getStringField("md5"));
@@ -398,7 +401,6 @@ vector<VersionRec> fileArchiver::getVersioninfo(string filename) {
         timespec time;
         time.tv_nsec = subversion.getField("Mtnsec").numberLong();
         time.tv_sec = subversion.getField("mtsec").numberLong();
-        cout << "ok" << endl;
 
         VR.setLength(length.Int());
         VR.setModifyTime(time);

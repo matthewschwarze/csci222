@@ -120,7 +120,6 @@ void VersionRec::writeToDB(mongo::DBClientConnection& conn) {
         mongo::OID theoid(this->versionid);
         record.append("_id", theoid);
     }
-    cout << "ok" << endl;
 
     record.append("Tempname", this->tmpname);
     record.append("filehash", this->filehash);
