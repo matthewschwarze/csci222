@@ -150,8 +150,8 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
         this->origHash = record.getStringField("ovhash");
         this->length = record.getIntField("length");
         this->versionCount = record.getIntField("nversions");
-        this->modifytime.tv_nsec = record.getIntField("Mtnsec");
-        this->modifytime.tv_sec = record.getIntField("mtsec");
+        this->modifytime.tv_nsec = record.getField("Mtnsec").numberLong();
+        this->modifytime.tv_sec = record.getField("mtsec").numberLong();
         this->refNum = record.getIntField("currentversion");
 
         vector<BSONElement> hashes(record.getField("FileBlkHashes").Array());
@@ -176,12 +176,12 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
         if (record.hasElement("versionrec")) {
             vector<BSONElement> array = record["versionrec"].Array();
             for (vector<BSONElement>::iterator it = array.begin(); it != array.end(); ++it) {
-                
+
                 BSONObj versionRecord = it->Obj();
-                BSONElement id = versionRecord.getField("id"); 
+                BSONElement id = versionRecord.getField("id");
                 appendVersion(id.String());
             }
-        }else{
+        } else {
             cout << "no other versions" << endl;
         }
     }
@@ -195,19 +195,19 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     record.append("ovhash", this->origHash);
     record.append("length", this->length);
     record.append("nversions", this->versionCount);
-    record.append("Mtnsec", 0);
-    record.append("mtsec", 0);
+    /* love you */ long long time = this->modifytime.tv_nsec;
+    record.append("Mtnsec", time);
+    time = this->modifytime.tv_sec;
+    record.append("mtsec", time);
     record.append("currentversion", this->refNum);
 
     mongo::BSONArrayBuilder bArr;
     mongo::BSONArrayBuilder Comments;
     for (vector<string>::iterator it = blockhashes.begin(); it != blockhashes.end(); ++it) {
-        //record.append("$push" << BSON("FileBlkHashes" << *it));
         bArr.append(*it);
     }
 
     for (vector<comment>::iterator it = comments.begin(); it != comments.end(); ++it) {
-        //record.append("$push" << BSON("FileBlkHashes" << *it));
         BSONObjBuilder comment;
         comment.append("version", it->version); //think about converting from string to struct
         comment.append("comment", it->comment);
@@ -217,27 +217,22 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
     if (!versions.empty()) {
         mongo::BSONArrayBuilder Version;
         for (vector<string>::iterator it = versions.begin(); it != versions.end(); ++it) {
-            //record.append("$push" << BSON("FileBlkHashes" << *it));
             BSONObjBuilder version;
             version.append("id", (*it));
-
             Version.append(version.obj());
         }
         record.append("versionrec", Version.arr());
     }
-
     record.append("FileBlkHashes", bArr.arr());
     record.append("comments", Comments.arr());
 
     BSONObj result = record.obj();
-
     auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.Filerec", MONGO_QUERY("filename" << filename));
     if (cursor->more()) {
         conn.update("fileRecords.Filerec", MONGO_QUERY("filename" << filename), result);
     } else {
         conn.insert("fileRecords.Filerec", result);
     }
-
     string e = conn.getLastError();
     if (!e.empty()) {
         cout << "something failed failed: " << e << std::endl;

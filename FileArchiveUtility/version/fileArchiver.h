@@ -39,7 +39,7 @@ public:
     void retriveVersion(int, std::string, std::string);
     int getCurrentVersionNumber(std::string);
     std::string getHashOfLastSaved(std::string);
-    bool getComment(std::string, int);
+    std::string getComment(std::string, int);
     //vector<versionInfo> getVersioninfo(std::string);
     FileRec* getDetailsOfLastSaved(std::string);
     std::vector<VersionRec> getVersioninfo(std::string);

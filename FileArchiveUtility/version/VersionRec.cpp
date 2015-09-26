@@ -88,8 +88,8 @@ void VersionRec::readFromDB(mongo::DBClientConnection& conn, string versionID) {
         this->tmpname = record.getStringField("Tempname");
         this->filehash = record.getStringField("filehash");
         this->length = record.getIntField("length");
-        this->modifytime.tv_nsec = record.getIntField("Mtnsec");
-        this->modifytime.tv_sec = record.getIntField("mtsec");
+        this->modifytime.tv_nsec = record.getField("Mtnsec").numberLong();
+        this->modifytime.tv_sec = record.getField("mtsec").numberLong();
         this->versionnumber = record.getIntField("Version");
 
         vector<BSONElement> hashes(record.getField("Blktable").Array());
@@ -126,8 +126,10 @@ void VersionRec::writeToDB(mongo::DBClientConnection& conn) {
     record.append("filehash", this->filehash);
     record.append("length", this->length);
     record.append("Version", this->versionnumber);
-    record.append("Mtnsec", 0);
-    record.append("mtsec", 0);
+    /* love you */ long long time = this->modifytime.tv_nsec;
+    record.append("Mtnsec", time);
+    time = this->modifytime.tv_sec;
+    record.append("mtsec", time);
 
     mongo::BSONArrayBuilder Version;
     for (vector<VersionDiffBlock>::iterator it = changes.begin(); it != changes.end(); ++it) {
