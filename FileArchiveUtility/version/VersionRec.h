@@ -4,7 +4,11 @@
 #include <vector>
 #include <string>
 #include <time.h>
-#include <mongo/client/dbclient.h>
+#include "mongo/client/dbclient.h"
+#include "mongo/bson/bson.h"
+#include "mongo/client/dbclientcursor.h"
+#include "mongo/client/gridfs.h"
+#include <boost/filesystem.hpp>
 
 typedef std::string HashType;
 const int BLOCK_SIZE = 4096;
@@ -18,7 +22,7 @@ struct VersionDiffBlock {
 
 class VersionRec {
 private:
-    int versionid;
+    std::string versionid;
     int versionnumber;
     int length;
     std::string tmpname;
@@ -34,7 +38,7 @@ public:
     //---- Accessor Functions ----//
     std::string gettmpname() const;
 
-    int getVersionID() const;
+    std::string getVersionID() const;
 
     int getVersionNumber() const;
 
@@ -51,7 +55,7 @@ public:
     //---- Mutator Functions ----//
     void settmpname(std::string t);
 
-    void setVersionID(int v);
+    void setVersionID(std::string v);
 
     void setVersionNumber(int n);
 
@@ -64,9 +68,9 @@ public:
     void changesAppend(VersionDiffBlock b);
 
     //---- Read / Writing Functions ----//
-    void readFromDB(mongo::DBClientConnection conn, int vid);
+    void readFromDB(mongo::DBClientConnection &conn, std::string vid);
 
-    void writeToDB(mongo::DBClientConnection conn);
+    void writeToDB(mongo::DBClientConnection &conn);
 
     //---- Overloaded Operators ----//
     bool operator==(const VersionRec& other);
