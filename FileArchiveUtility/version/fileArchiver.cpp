@@ -49,8 +49,8 @@ bool fileArchiver::differs(string filename) {
 }
 
 /**********************************************************
- *checks to see if two files of same name have equal hash
- * true when they do differ
+ *checks to see if a record exists of the same name
+ * true when record already exists
 ***********************************************************/
 bool fileArchiver::exists(string filename) {
     //check for the existance of a filerec with same name
@@ -67,6 +67,10 @@ bool fileArchiver::exists(string filename) {
 
 }
 
+/**********************************************************
+ *creates a zip file of given localfile to tempname
+ * 
+***********************************************************/
 void fileArchiver::createZipFile(const string& localfile, string& tempname) {
     std::string command = "/bin/gzip -c ";
     //std::string command = "/bin/cp ";
@@ -78,6 +82,10 @@ void fileArchiver::createZipFile(const string& localfile, string& tempname) {
     system(command.c_str());
 }
 
+/**********************************************************
+ *unzips file of given localfile to tempname
+ * 
+***********************************************************/
 void fileArchiver::unZipFile(const string& localfile, string& tempname) {
     std::string command = "/bin/gunzip -c ";
     //std::string command = "/bin/cp ";
@@ -89,6 +97,10 @@ void fileArchiver::unZipFile(const string& localfile, string& tempname) {
     system(command.c_str());
 }
 
+/**********************************************************
+ *inserts a new record into the database
+ * 
+***********************************************************/
 void fileArchiver::insertNew(string filename, string commentp) {
 
     mongo::GridFS gfs(conn, "fileRecords"); //get a gridfs connection to the database, fileRecords is the name "table"

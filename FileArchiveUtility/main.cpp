@@ -46,7 +46,7 @@ int main() {
         tmp = "fileArchiver.cpp";
         comment = "~/";
        // cout << "getting version 0" << endl;
-       // db.retriveVersion(0, tmp, comment);
+        db.retriveVersion(16, tmp, comment);
         //for (int i = 0; i < 4; i++)
         //    db.removeVersion(14, tmp);
       /*  vector<VersionRec> vers= db.getVersioninfo(tmp);
