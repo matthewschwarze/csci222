@@ -181,9 +181,7 @@ void FileRec::readFromDB(mongo::DBClientConnection& conn, string filename) {
                 BSONElement id = versionRecord.getField("id");
                 appendVersion(id.String());
             }
-        } else {
-            cout << "no other versions" << endl;
-        }
+        } 
     }
 }
 
@@ -239,40 +237,9 @@ void FileRec::writeToDB(mongo::DBClientConnection &conn) {
         sleep(1);
         exit(1);
     }
-}
-
-void FileRec::createData(string filename) {
-    ifstream testFile(filename.c_str());
-
-    if (testFile.bad()) {
-        string err;
-        err += "Could not open file \'";
-        err += filename;
-        err += "\'.";
-        throw runtime_error(err);
+    else{
+        cout << "record " << this->refNum << " successfully written to database" << endl;
     }
-
-    // Get metadata on file
-    struct stat filedata;
-    int result = stat(filename.c_str(), &filedata);
-    if (result == -1) {
-        string err;
-        err += "Could not open file \'";
-        err += filename;
-        err += "\'.";
-        throw runtime_error(err);
-    }
-
-    // Set up this record to match the data collected
-    setFilename(filename);
-    timespec modtime;
-    modtime.tv_sec = filedata.st_mtime;
-    setModTime(modtime);
-
-    string strHash = hash_md5(filename);
-    setHashLatest(strHash);
-
-
 }
 
 bool FileRec::operator==(const FileRec& other) {

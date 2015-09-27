@@ -106,7 +106,7 @@ void VersionRec::readFromDB(mongo::DBClientConnection& conn, string versionID) {
         }
     }
     else{
-        cout << "no luck " << versionID << endl;
+        cout << "could not find version " << versionID << endl;
     }
 }
 
@@ -159,5 +159,8 @@ void VersionRec::writeToDB(mongo::DBClientConnection& conn) {
         cout << "something failed failed: " << e << std::endl;
         sleep(1);
         exit(1);
+    }
+    else{
+        cout << "Version " << this->versionnumber << " successfully written to database" << endl;
     }
 }

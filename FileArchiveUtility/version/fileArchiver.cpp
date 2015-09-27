@@ -26,6 +26,11 @@ fileArchiver::fileArchiver() {
     conn.connect(dbhost);
 }
 
+/**********************************************************
+ *checks to see if two files of same name have equal hash
+ * true when they do differ
+***********************************************************/
+
 bool fileArchiver::differs(string filename) {
 
     boost::filesystem::path p(filename); //get filename from path
@@ -43,6 +48,10 @@ bool fileArchiver::differs(string filename) {
     }
 }
 
+/**********************************************************
+ *checks to see if two files of same name have equal hash
+ * true when they do differ
+***********************************************************/
 bool fileArchiver::exists(string filename) {
     //check for the existance of a filerec with same name
     boost::filesystem::path p(filename); //get filename from path
@@ -220,6 +229,7 @@ void fileArchiver::update(string filename, string commentp) {
 
 void fileArchiver::removeVersion(int version, string filename) {
     if (!exists(filename)) {
+        cout << "no Record: " << filename << " found!" << endl; 
         return;
     }
     FileRec* Origrecord = getDetailsOfLastSaved(filename); //get latest version
@@ -281,6 +291,7 @@ void fileArchiver::removeVersion(int version, string filename) {
             conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("_id" << mongo::OID(id)));
 
             Origrecord->writeToDB(conn); //write to the db
+            cout << "Record " << id << " successfully removed from database" << endl;
 
         } else {//no versions left delete whole record
             auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(Origrecord->getBlobName())));
@@ -295,9 +306,9 @@ void fileArchiver::removeVersion(int version, string filename) {
             //delete the Version rec
             filter = "fileRecords.Filerec";
             conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("filename" << Origrecord->getFilename()));
+            cout << "Entire record successfully removed from database" << endl;
+
         }
-
-
     } else {//is a stored version
         //find comment belonging to that version
         for (vector<comment>::iterator it = Origrecord->getCommentsBegin(); it != Origrecord->getCommentsEnd(); ++it) {
@@ -311,7 +322,6 @@ void fileArchiver::removeVersion(int version, string filename) {
             if (cursor->more()) { //found version rec
                 VersionRec tmp;
                 tmp.readFromDB(conn, (*it)); //read it into memory
-                cout << "found version to delete " << (*it) << endl;
                 //query all of the file chunks and remove, replace with deleting the array of bin data if i get there 
                 auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(tmp.gettmpname())));
 
@@ -327,6 +337,8 @@ void fileArchiver::removeVersion(int version, string filename) {
                 filter = "fileRecords.FileVersion";
                 conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("_id" << mongo::OID((*it))));
                 Origrecord->setVersionNum(Origrecord->getVersionNum() - 1);
+                cout << "Record ID" << (*it) << " successfully removed from database" << endl;
+
             } else {//add record id to version to keep
                 VersionsToKeep.push_back((*it));
             }
@@ -334,7 +346,7 @@ void fileArchiver::removeVersion(int version, string filename) {
         Origrecord->clearVersions(); //remove current collection
         for (vector<string>::iterator it = VersionsToKeep.begin(); it != VersionsToKeep.end(); ++it)
             Origrecord->appendVersion((*it)); //add version ids to keep
-        //boogy man do da
+        
         Origrecord->clearComments(); //remove current collection
         for (vector<comment>::iterator it = commentsToKeep.begin(); it != commentsToKeep.end(); ++it)
             Origrecord->appendComment((*it)); //add comments to keep
@@ -345,6 +357,7 @@ void fileArchiver::removeVersion(int version, string filename) {
 
 void fileArchiver::retriveVersion(int version, string filename, string retrived) {
     if (!exists(filename)) {
+        cout << "no Record: " << filename << " found!" << endl; 
         return;
     }
 
@@ -452,9 +465,37 @@ string fileArchiver::getHashOfLastSaved(string filename) {
     return hash;
 }
 
-/*
-void fileArchiver::setReference(string, int, string);
- */
+
+void fileArchiver::setReference(string filename, int version, string comment){ //remove all versions insert new
+    vector<VersionRec> prevRecords = getVersioninfo(filename);
+    
+    update(filename, comment);
+    FileRec * Origrecord = getDetailsOfLastSaved(filename);
+    //change comment version id to match user specified
+    vector<struct comment> newComments;
+    for(vector<struct comment>::iterator it = Origrecord->getCommentsBegin(); it != Origrecord->getCommentsEnd(); ++it){
+        if((*it).version == Origrecord->getReferenceVersion())
+            (*it).version = version; 
+        newComments.push_back((*it));
+     }
+    Origrecord->clearComments();
+    
+    for(vector<struct comment>::iterator it = newComments.begin(); it != newComments.end(); ++it){
+        Origrecord->appendComment((*it));
+     }
+    
+    //do the same for the record
+    Origrecord->setReferenceVersion(version);
+    Origrecord->setHashOriginal(Origrecord->getHashLatest());
+    //write changes
+    Origrecord->writeToDB(conn);
+    
+    //iterate though and remove all other versions
+     for(vector<VersionRec>::iterator it = prevRecords.begin(); it != prevRecords.end(); ++it){
+         removeVersion((*it).getVersionNumber(), filename);
+     }
+}
+
 
 fileArchiver::~fileArchiver() {
     //close connection
