@@ -134,15 +134,16 @@ void fileArchiver::insertNew(string filename, string commentp) {
     record.setBlockCount(result.getIntField("length"));
     record.setReferenceVersion(0); //first version as it is insert new
     record.setVersionNum(1);
-    long long v = result.getField("uploadDate").Date().millis;
+    long long v = result.getField("uploadDate").Date().millis; //get time in milliseconds
     timespec modtime;
     modtime.tv_nsec = v;
     modtime.tv_sec = v / 1000;
     record.setModTime(modtime);
 
-    record.setHashOriginal(result.getStringField("md5"));
+    record.setHashOriginal(result.getStringField("md5")); //getting hash from db
     record.setHashLatest(result.getStringField("md5"));
 
+    //getting the hash of individual blocks
     auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(id)));
     while (cursor->more()) {
         BSONObj p = cursor->next();
@@ -150,26 +151,30 @@ void fileArchiver::insertNew(string filename, string commentp) {
         int leng;
         string data = binData.binData(leng);
         string hash = hash_md5_data(data);
-        record.appendBlock(hash);
+        record.appendBlock(hash); //store hash
     }
-    unlink(tempname.c_str());
-
-    record.writeToDB(conn);
-
-
+    unlink(tempname.c_str()); // remove tmp file
+    record.writeToDB(conn);//write record to db
 }
 
+/**********************************************************
+ *gets details of last record to be put into db for that filename
+ * 
+***********************************************************/
 FileRec* fileArchiver::getDetailsOfLastSaved(string filename) {
     FileRec* record = new FileRec;
     record->readFromDB(conn, filename);
     return record;
 }
 
+/**********************************************************
+ *updates an existing record
+ * 
+***********************************************************/
 void fileArchiver::update(string filename, string commentp) {
-    FileRec* Origrecord = getDetailsOfLastSaved(filename);
+    FileRec* Origrecord = getDetailsOfLastSaved(filename); //get current record for the file
 
-    VersionRec newV;
-    stringstream convert; // stream used for the conversion
+    VersionRec newV;//used to store the current fileRec 
 
     newV.setFilehash(Origrecord->getHashLatest());
     newV.settmpname(Origrecord->getBlobName());
@@ -177,15 +182,15 @@ void fileArchiver::update(string filename, string commentp) {
     newV.setLength(Origrecord->getBlockCount());
     newV.setVersionNumber(Origrecord->getReferenceVersion());
     setVersionBlocks(*(Origrecord), newV); // get block hashes and bin data, store in the version
-    newV.writeToDB(conn);
+    newV.writeToDB(conn); //write new versionRec to db
 
+    //set up fileRec to contain data from newly inserted file
     Origrecord->setVersionNum(Origrecord->getVersionNum() + 1);
     Origrecord->setReferenceVersion(Origrecord->getReferenceVersion() + 1);
-    //woo
+    
     Origrecord->clearBlockHashes();
     Origrecord->appendVersion(newV.getVersionID());
 
-    //write newV to database
     mongo::GridFS gfs(conn, "fileRecords"); //get a gridfs connection to the database, fileRecords is the name "table"
     gfs.setChunkSize(1024 * 4); //4kb chunck sizes
 
@@ -197,7 +202,7 @@ void fileArchiver::update(string filename, string commentp) {
 
     boost::filesystem::path p(filename); //get filename from path
     string path(p.filename().c_str());
-    Origrecord->setFilename(path);
+    Origrecord->setFilename(path); //don't need to do this as filename hasn't changed 
 
     comment data;
     data.comment = commentp;
@@ -212,7 +217,6 @@ void fileArchiver::update(string filename, string commentp) {
     }
     Origrecord->setBlobName(id); //set id
 
-    //int numBlocks = result.getIntField("length") / result.getIntField("chunkSize") + (result.getIntField("length") % result.getIntField("chunkSize") != 0);
     Origrecord->setBlockCount(result.getIntField("length"));
 
     long long v = result.getField("uploadDate").Date().millis;
@@ -221,7 +225,7 @@ void fileArchiver::update(string filename, string commentp) {
     modtime.tv_sec = v / 1000;
     Origrecord->setModTime(modtime);
 
-    Origrecord->setHashLatest(result.getStringField("md5"));
+    Origrecord->setHashLatest(result.getStringField("md5")); //don't update the original hash
 
     auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(id)));
     while (cursor->more()) {
@@ -234,13 +238,17 @@ void fileArchiver::update(string filename, string commentp) {
     }
     unlink(tempname.c_str());
 
-    Origrecord->writeToDB(conn);
+    Origrecord->writeToDB(conn); //write updated fileRec to db
     delete Origrecord;
 
 }
 
+/**********************************************************
+ *removes a given version from the db
+ * 
+***********************************************************/
 void fileArchiver::removeVersion(int version, string filename) {
-    if (!exists(filename)) {
+    if (!exists(filename)) { //record dosen't exist
         cout << "no Record: " << filename << " found!" << endl; 
         return;
     }
@@ -256,17 +264,17 @@ void fileArchiver::removeVersion(int version, string filename) {
                 commentsToKeep.push_back((*it));
         }
         for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
-            id = (*it);
+            id = (*it);//get the id of the next most recent version, stored in chronological order
         }
         for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
             if (id != (*it)) {
-                VersionsToKeep.push_back((*it));
+                VersionsToKeep.push_back((*it)); //removing the version to become the new fileRec from versions collection
             }
         }
 
-        if (id != "") {
+        if (id != "") { //if there is a valid version
             VersionRec newCurrFile;
-            newCurrFile.readFromDB(conn, id);
+            newCurrFile.readFromDB(conn, id); //read it into memory
 
             auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.fs.chunks", MONGO_QUERY("files_id" << mongo::OID(Origrecord->getBlobName())));
             string filter = "fileRecords.fs.chunks";
@@ -278,7 +286,7 @@ void fileArchiver::removeVersion(int version, string filename) {
             filter = "fileRecords.fs.files";
             conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("_id" << mongo::OID(Origrecord->getBlobName())));
 
-
+            //update fileRec
             Origrecord->setVersionNum(Origrecord->getVersionNum() - 1);
             Origrecord->setBlobName(newCurrFile.gettmpname());
             Origrecord->setBlockCount(newCurrFile.getLength());
@@ -299,6 +307,7 @@ void fileArchiver::removeVersion(int version, string filename) {
             for (vector<comment>::iterator it = commentsToKeep.begin(); it != commentsToKeep.end(); ++it)
                 Origrecord->appendComment((*it)); //add comments to keep
 
+            //remove the version that is now the fileRec from the FileVersion collection
             filter = "fileRecords.FileVersion";
             conn.mongo::DBClientBase::remove(filter, MONGO_QUERY("_id" << mongo::OID(id)));
 
@@ -367,6 +376,10 @@ void fileArchiver::removeVersion(int version, string filename) {
     }
 }
 
+/**********************************************************
+ *retrive a version from the db  to user specified path
+ * 
+***********************************************************/
 void fileArchiver::retriveVersion(int version, string filename, string retrived) {
     if (!exists(filename)) {
         cout << "no Record: " << filename << " found!" << endl; 
@@ -377,10 +390,10 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
 
     bool found = false;
     string fileRef;
-    if (Origrecord->getReferenceVersion() == version) {
+    if (Origrecord->getReferenceVersion() == version) { //current fileRec is the version they are after
         fileRef = Origrecord->getBlobName();
         found = true;
-    } else {
+    } else {//check in the version records
         for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
             VersionRec tmp;
             tmp.readFromDB(conn, (*it));
@@ -392,11 +405,11 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
         } //get the id's iterate until version match 
     }
     if (!found) { //work out a way to send a did not find version
-        cout << "not found" << endl;
+        cout << "version not found" << endl;
         delete Origrecord;
         return;
     }
-    std::string tempname = tempnam("/tmp", "ARKIV");
+    std::string tempname = tempnam("/tmp", "ARKIV");// create tmp file to load data into
     tempname += ".gz";
     BSONObjBuilder record;
     record.append("_id", mongo::OID(fileRef));
@@ -404,19 +417,24 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
     BSONObj test = record.obj();
 
     mongo::GridFile afile = gfs.findFile(test);
-    unsigned long long length = afile.write(tempname);
-    retrived += Origrecord->getFilename();
-    unZipFile(tempname, retrived);
+    unsigned long long length = afile.write(tempname); //write to tmp file
+    retrived += Origrecord->getFilename(); //adds file name to given path
+    unZipFile(tempname, retrived); //unzips and places file in given directory
 
     unlink(tempname.c_str());
     delete Origrecord;
 }
 
+/**********************************************************
+ *returns information about the different versions
+ * length, version and modifytime (seconds) are set and 
+ * returned in the VersionRec objects
+***********************************************************/
 vector<VersionRec> fileArchiver::getVersioninfo(string filename) {
     FileRec * Origrecord = getDetailsOfLastSaved(filename);
-    vector<VersionRec> versions;
+    vector<VersionRec> versions;//to store the version info
     for (vector<string>::iterator it = Origrecord->getVersionBegin(); it != Origrecord->getVersionEnd(); ++it) {
-
+        //get all the versions from the db using id's stored in the versions collection
         VersionRec VR;
         auto_ptr<mongo::DBClientCursor> subcursor = conn.query("fileRecords.FileVersion", MONGO_QUERY("_id" << mongo::OID((*it))));
 
@@ -432,7 +450,7 @@ vector<VersionRec> fileArchiver::getVersioninfo(string filename) {
         VR.setVersionNumber(versionnum.Int());
         versions.push_back(VR);
     }
-    //set up current version
+    //put current version into a version rec as well
     VersionRec VR;
     VR.setLength(Origrecord->getBlockCount());
     VR.setVersionNumber(Origrecord->getReferenceVersion());
@@ -441,8 +459,12 @@ vector<VersionRec> fileArchiver::getVersioninfo(string filename) {
     return versions;
 }
 
+/**********************************************************
+ *used to set and store data in the VersionDiffBlock struct
+ * in VersionRec
+***********************************************************/
 void fileArchiver::setVersionBlocks(FileRec record, VersionRec &version) {
-    int i = 0;
+    int i = 0; //copy blocks from fileRec into the VersionRec
     for (vector<string>::iterator it = record.getBlocksBegin(); it != record.getBlocksEnd(); ++it) {
         VersionDiffBlock tmp;
         tmp.blockNo = i;
@@ -452,17 +474,25 @@ void fileArchiver::setVersionBlocks(FileRec record, VersionRec &version) {
     }
 }
 
+/**********************************************************
+ *gets comment for a given record
+ * 
+***********************************************************/
 string fileArchiver::getComment(string filename, int version) {
     FileRec * Origrecord = getDetailsOfLastSaved(filename);
     string Comment = "";
 
     for (vector<comment>::iterator it = Origrecord->getCommentsBegin(); it != Origrecord->getCommentsEnd(); ++it) {
-        if ((*it).version == version)//keep comments 
+        if ((*it).version == version)//keep comment
             Comment = (*it).comment;
     }
     return Comment;
 }
 
+/**********************************************************
+ *returns current versions number
+ * 
+***********************************************************/
 int fileArchiver::getCurrentVersionNumber(string filename) {
     int refnum = -1;
     FileRec * Origrecord = getDetailsOfLastSaved(filename);
@@ -470,6 +500,10 @@ int fileArchiver::getCurrentVersionNumber(string filename) {
     return refnum;
 }
 
+/**********************************************************
+ *gets hash of current fileRec
+ * 
+***********************************************************/
 string fileArchiver::getHashOfLastSaved(string filename) {
     string hash = "";
     FileRec * Origrecord = getDetailsOfLastSaved(filename);
@@ -477,7 +511,12 @@ string fileArchiver::getHashOfLastSaved(string filename) {
     return hash;
 }
 
-
+/**********************************************************
+ *basically makes this the new original record, since whole files
+ * are stored not the updates there is no need for such a function
+ * but to emulate what it should do, it deletes all previous versions
+ * and makes it the only record
+***********************************************************/
 void fileArchiver::setReference(string filename, int version, string comment){ //remove all versions insert new
     vector<VersionRec> prevRecords = getVersioninfo(filename);
     
@@ -510,6 +549,6 @@ void fileArchiver::setReference(string filename, int version, string comment){ /
 
 
 fileArchiver::~fileArchiver() {
-    //close connection
+    //nothing to do
 }
 
