@@ -92,8 +92,6 @@ class FileRec {
 		
 		//---- Reading / Writing Functions ----//
 		
-		void createData(std::string filename);
-		
 		void readFromDB(mongo::DBClientConnection&, std::string filename);
 		
 		void writeToDB(mongo::DBClientConnection&);

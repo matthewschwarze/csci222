@@ -19,6 +19,7 @@ CCC=g++
 CXX=g++
 FC=gfortran
 AS=as
+QMAKE=qmake
 
 # Macros
 CND_PLATFORM=GNU-Linux-x86
@@ -34,12 +35,7 @@ include Makefile
 OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
-OBJECTFILES= \
-	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/version/FileHash.o \
-	${OBJECTDIR}/version/FileRec.o \
-	${OBJECTDIR}/version/VersionRec.o \
-	${OBJECTDIR}/version/fileArchiver.o
+OBJECTFILES=
 
 
 # C Compiler Flags
@@ -58,53 +54,25 @@ ASFLAGS=
 # Link Libraries and Options
 LDLIBSOPTIONS=/lib/x86_64-linux-gnu/mongo-client-install/lib/libmongoclient.a -lboost_thread -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex -lpthread -lQtCore -lQtGui
 
+nbproject/qt-${CND_CONF}.mk: nbproject/qt-${CND_CONF}.pro FORCE
+	${QMAKE} VPATH=. -o qttmp-${CND_CONF}.mk nbproject/qt-${CND_CONF}.pro
+	mv -f qttmp-${CND_CONF}.mk nbproject/qt-${CND_CONF}.mk
+
+FORCE:
+
 # Build Targets
-.build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility
+.build-conf: ${BUILD_SUBPROJECTS} nbproject/qt-${CND_CONF}.mk
+	"${MAKE}" -f nbproject/qt-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/FileArchiveUtility
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility: /lib/x86_64-linux-gnu/mongo-client-install/lib/libmongoclient.a
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility: ${OBJECTFILES}
-	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility ${OBJECTFILES} ${LDLIBSOPTIONS}
-
-${OBJECTDIR}/main.o: main.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -I/usr/include/qt4 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
-
-${OBJECTDIR}/version/FileHash.o: version/FileHash.cpp 
-	${MKDIR} -p ${OBJECTDIR}/version
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -I/usr/include/qt4 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/FileHash.o version/FileHash.cpp
-
-${OBJECTDIR}/version/FileRec.o: version/FileRec.cpp 
-	${MKDIR} -p ${OBJECTDIR}/version
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -I/usr/include/qt4 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/FileRec.o version/FileRec.cpp
-
-${OBJECTDIR}/version/VersionRec.o: version/VersionRec.cpp 
-	${MKDIR} -p ${OBJECTDIR}/version
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -I/usr/include/qt4 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/VersionRec.o version/VersionRec.cpp
-
-${OBJECTDIR}/version/fileArchiver.o: version/fileArchiver.cpp 
-	${MKDIR} -p ${OBJECTDIR}/version
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/lib/x86_64-linux-gnu/mongo-client-install/include/ -I/usr/include/qt4 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/version/fileArchiver.o version/fileArchiver.cpp
+${CND_BUILDDIR}/Debug/%.o: nbproject/qt-${CND_CONF}.mk
+	${MAKE} -f nbproject/qt-${CND_CONF}.mk "$@"
 
 # Subprojects
 .build-subprojects:
 
 # Clean Targets
-.clean-conf: ${CLEAN_SUBPROJECTS}
-	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/filearchiveutility
+.clean-conf: ${CLEAN_SUBPROJECTS} nbproject/qt-${CND_CONF}.mk
+	${MAKE} -f nbproject/qt-${CND_CONF}.mk distclean
 
 # Subprojects
 .clean-subprojects:
-
-# Enable dependency checking
-.dep.inc: .depcheck-impl
-
-include .dep.inc

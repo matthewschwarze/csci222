@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=filearchiveutility
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/filearchiveutility
+CND_ARTIFACT_NAME_Debug=FileArchiveUtility
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/FileArchiveUtility
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=filearchiveutility.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/filearchiveutility.tar
+CND_PACKAGE_NAME_Debug=FileArchiveUtility.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/FileArchiveUtility.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=filearchiveutility
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/filearchiveutility
+CND_ARTIFACT_NAME_Release=FileArchiveUtility
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/FileArchiveUtility
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=filearchiveutility.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/filearchiveutility.tar
+CND_PACKAGE_NAME_Release=FileArchiveUtility.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/FileArchiveUtility.tar
 #
 # include compiler specific variables
 #
