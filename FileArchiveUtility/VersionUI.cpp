@@ -18,8 +18,8 @@ VersionUI::VersionUI() {
     try {
         db = new fileArchiver();
         std::cout << "connected ok" << std::endl;
-        std::string tmp = "fileArchiver.cpp";
-        std::string comment = "zipped test ";
+        std::string tmp = "commentDialog.cpp";
+        
         vector<VersionRec>* vers= new vector<VersionRec>;
         (*vers) = db->getVersioninfo(tmp);
         
@@ -69,7 +69,16 @@ void VersionUI::openFile(){
     
     //send the file and the comment to fileArchiver
     std::cout << "Filename: " << fileName << "\tComment: " << comment << std::endl;
-    db->insertNew(fileName, comment);
+    if(db->exists(fileName)){
+        if(db->differs(fileName)){
+            db->update(fileName, comment); //there are differences so create a new version
+        }
+        else{//add in a message or something saying the file is the same
+        }
+    }
+    else{
+        db->insertNew(fileName, comment); //no other files by this name
+    }
     
     widget.fileLine->setText(fileN);
 }
