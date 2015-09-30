@@ -29,13 +29,14 @@ int main() {
         fileArchiver db;
         std::cout << "connected ok" << std::endl;
         std::string tmp = "version/fileArchiver.cpp";
-        std::string comment = "zipped test ";
+        std::string comment = "new ref version ";
         if (db.exists(tmp)) {
             cout << "already exists" << std::endl;
             //call differs
             if (db.differs(tmp)) {
                 cout << "they are different" << endl;
-                 db.update(tmp, comment);
+                db.update(tmp, comment);
+                //db.setReference(tmp, 13, comment);
             } else {
                 std::cout << "they are not different" << endl;
             }
@@ -44,11 +45,11 @@ int main() {
         }
         tmp = "fileArchiver.cpp";
         comment = "~/";
-        cout << "getting version 0" << endl;
-        db.retriveVersion(0, tmp, comment);
+       // cout << "getting version 0" << endl;
+        //db.retriveVersion(16, tmp, comment);
         //for (int i = 0; i < 4; i++)
-           // db.removeVersion(i, tmp);
-        vector<VersionRec> vers= db.getVersioninfo(tmp);
+        //    db.removeVersion(14, tmp);
+      /*  vector<VersionRec> vers= db.getVersioninfo(tmp);
         cout << "versions info" << endl;
         for(vector<VersionRec>::iterator it = vers.begin(); it != vers.end(); ++it)
             cout << (*it).getVersionNumber() << " " << (*it).getLength() << " " << (*it).getModifyTime().tv_sec << endl;
@@ -60,7 +61,7 @@ int main() {
         cout << "comment of version " << curr << " " <<comm << endl;
    
         string hash = db.getHashOfLastSaved(tmp);
-        cout << "current hash " <<hash << endl;
+        cout << "current hash " <<hash << endl; */
 
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;

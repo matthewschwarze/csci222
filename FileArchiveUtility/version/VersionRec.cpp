@@ -76,13 +76,17 @@ void VersionRec::changesAppend(VersionDiffBlock b) {
     changes.push_back(b);
 }
 
+/**********************************************************
+ *see readFromDB in FileRec, similar structure
+ * 
+***********************************************************/
 void VersionRec::readFromDB(mongo::DBClientConnection& conn, string versionID) {
 
     auto_ptr<mongo::DBClientCursor> cursor =
             conn.query("fileRecords.FileVersion", MONGO_QUERY("_id" << mongo::OID(versionID)));
 
     if (cursor->more()) {
-
+        //convert to VersionRec
         BSONObj record = cursor->next();
         this->versionid = versionID;
         this->tmpname = record.getStringField("Tempname");
@@ -92,6 +96,7 @@ void VersionRec::readFromDB(mongo::DBClientConnection& conn, string versionID) {
         this->modifytime.tv_sec = record.getField("mtsec").numberLong();
         this->versionnumber = record.getIntField("Version");
 
+        //similar to the comments collection in readfromDB in FileRec
         vector<BSONElement> hashes(record.getField("Blktable").Array());
         for (vector<BSONElement>::iterator it = hashes.begin(); it != hashes.end(); ++it) {
 
@@ -106,21 +111,25 @@ void VersionRec::readFromDB(mongo::DBClientConnection& conn, string versionID) {
         }
     }
     else{
-        cout << "no luck " << versionID << endl;
+        cout << "could not find version " << versionID << endl;
     }
 }
 
+/**********************************************************
+ *similar to writetodb in FileRec
+ * 
+***********************************************************/
 void VersionRec::writeToDB(mongo::DBClientConnection& conn) {
 
     BSONObjBuilder record;
 
-    if (this->versionid.empty()) {
-        record.genOID();
+    if (this->versionid.empty()) { //if no id has been read in because it is a new version
+        record.genOID();//create one
     } else {
-        mongo::OID theoid(this->versionid);
+        mongo::OID theoid(this->versionid); //use current id
         record.append("_id", theoid);
     }
-
+    //convert to BSON
     record.append("Tempname", this->tmpname);
     record.append("filehash", this->filehash);
     record.append("length", this->length);
@@ -148,9 +157,9 @@ void VersionRec::writeToDB(mongo::DBClientConnection& conn) {
     }
 
     auto_ptr<mongo::DBClientCursor> cursor = conn.query("fileRecords.FileVersion", MONGO_QUERY("_id" << mongo::OID(this->versionid)));
-    if (cursor->more()) {
+    if (cursor->more()) {//already a version with same id, update
         conn.update("fileRecords.FileVersion", MONGO_QUERY("_id" << mongo::OID(this->versionid)), result);
-    } else {
+    } else { //new version
         conn.insert("fileRecords.FileVersion", result);
     }
 
@@ -159,5 +168,8 @@ void VersionRec::writeToDB(mongo::DBClientConnection& conn) {
         cout << "something failed failed: " << e << std::endl;
         sleep(1);
         exit(1);
+    }
+    else{
+        cout << "Version " << this->versionnumber << " successfully written to database" << endl;
     }
 }
