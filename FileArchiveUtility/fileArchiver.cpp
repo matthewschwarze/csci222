@@ -537,8 +537,7 @@ void fileArchiver::setReference(string filename, int version, string comment) { 
         } else {
             versions.push_back((*it));
             if (version == versionnum.Int()) {//set the original hash to the new reference version hash
-                BSONElement versionnum = subversion.getField("hash");
-                hash = versionnum.toString();
+                hash = subversion.getStringField("filehash");
                 cout << hash << endl;
             }
         }
