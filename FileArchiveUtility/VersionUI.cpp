@@ -133,6 +133,7 @@ void VersionUI::setRef(){
     referenceBox->exec();
     if (referenceBox->isOk()==true){
         string tempComm = db->getComment(fileName, versNo);
+        cout << versNo << endl;
         db->setReference(fileName, versNo, tempComm);
         (*vers)=db->getVersioninfo(fileName);
         createTable();
