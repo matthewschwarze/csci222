@@ -12,6 +12,7 @@
 #include "retrieveVersion.h"
 #include "setReference.h"
 #include "commentDialog.h"
+#include "saveFunc.h"
 #include "getCommentForm.h"
 #include "fileArchiver.h"
 #include "VersionRec.h"
@@ -34,17 +35,24 @@ public:
     virtual ~VersionUI();
 public slots:
     void openFile();
-    void createTable(vector<VersionRec>* vers);
+    void createTable();
+    void itemSelection(const QModelIndex& index);
+    void showComment();
+    void setRef();
+    void getVers();
     void saveFile();
 private:
     Ui::VersionUI widget;
     commentDialog* commentBox;
+    saveFunc* saveBox;
     retrieveVersion* versionBox;
     setReference* referenceBox;
     getCommentForm* commentGet;
     fileArchiver* db;
+    vector<VersionRec>* vers;
     string fileName;
     const char* comment;
+    int versNo;
 };
 
 #endif	/* _VERSIONUI_H */

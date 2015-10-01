@@ -15,8 +15,12 @@ class setReference : public QDialog {
 public:
     setReference();
     virtual ~setReference();
+    bool isOk();
+public slots:
+    void okToDo();
 private:
     Ui::setReference widget;
+    bool okToDelete;
 };
 
 #endif	/* _SETREFERENCE_H */

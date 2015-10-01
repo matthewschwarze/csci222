@@ -11,6 +11,9 @@
 #include <QAbstractTableModel>
 #include <QtGui>
 #include <vector>
+#include <string>
+#include <sstream>
+#include <QDateTime>
 #include "fileArchiver.h"
 #include "VersionRec.h"
 

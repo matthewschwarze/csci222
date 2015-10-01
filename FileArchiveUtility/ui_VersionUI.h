@@ -1,7 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'VersionUI.ui'
 **
-** Created by: Qt User Interface Compiler version 4.8.6
+** Created: Thu Oct 1 14:43:41 2015
+**      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -88,7 +89,7 @@ public:
         label_2->setText(QApplication::translate("VersionUI", "Version History Table", 0, QApplication::UnicodeUTF8));
         browseButton->setText(QApplication::translate("VersionUI", "Browse", 0, QApplication::UnicodeUTF8));
         saveButton->setText(QApplication::translate("VersionUI", "Save", 0, QApplication::UnicodeUTF8));
-        historyButton->setText(QApplication::translate("VersionUI", "Retrieve History", 0, QApplication::UnicodeUTF8));
+        historyButton->setText(QApplication::translate("VersionUI", "Retrieve Version", 0, QApplication::UnicodeUTF8));
         refButton->setText(QApplication::translate("VersionUI", "Set Reference", 0, QApplication::UnicodeUTF8));
         commentButton->setText(QApplication::translate("VersionUI", "Comments", 0, QApplication::UnicodeUTF8));
     } // retranslateUi

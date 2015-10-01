@@ -1,7 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'commentDialog.ui'
 **
-** Created by: Qt User Interface Compiler version 4.8.6
+** Created: Thu Oct 1 14:43:41 2015
+**      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/

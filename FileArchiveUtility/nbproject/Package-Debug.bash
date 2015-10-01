@@ -68,7 +68,7 @@ copyFileToTmpDir "${OUTPUT_PATH}" "${NBTMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BA
 cd "${TOP}"
 rm -f ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/package/FileArchiveUtility.tar
 cd ${NBTMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/package/FileArchiveUtility.tar *
+tar -v -wcf ../../../../${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/package/FileArchiveUtility.tar *
 checkReturnCode
 
 # Cleanup

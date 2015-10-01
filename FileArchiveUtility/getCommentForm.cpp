@@ -16,16 +16,16 @@ getCommentForm::getCommentForm() {
 }
 
 void getCommentForm::pressOK(){
+    //get the comment on accept, store it
     QTextDocument* comm = widget.commentEdit->document();
     const char* tempComm = (*comm).toPlainText().toStdString().c_str();
-    std::cout << tempComm << std::endl;
     std::string tempStr(tempComm);
     comment=tempStr;
-    std::cout << comment << std::endl;
     accept();
 }
 
 std::string getCommentForm::get(){
+    //return the string stored last
     std::string str(comment);
     return str;
 }

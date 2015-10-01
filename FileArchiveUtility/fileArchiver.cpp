@@ -418,7 +418,7 @@ void fileArchiver::retriveVersion(int version, string filename, string retrived)
 
     mongo::GridFile afile = gfs.findFile(test);
     unsigned long long length = afile.write(tempname); //write to tmp file
-    retrived += Origrecord->getFilename(); //adds file name to given path
+    //retrived += Origrecord->getFilename(); //adds file name to given path
     unZipFile(tempname, retrived); //unzips and places file in given directory
 
     unlink(tempname.c_str());

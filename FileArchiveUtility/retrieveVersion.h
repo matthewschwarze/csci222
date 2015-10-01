@@ -10,19 +10,26 @@
 
 #include "ui_retrieveVersion.h"
 #include <iostream>
+#include <fstream>
 #include <QFileDialog>
+#include "fileArchiver.h"
+#include "VersionRec.h"
 
 class retrieveVersion : public QDialog {
     Q_OBJECT
 public:
     retrieveVersion();
     virtual ~retrieveVersion();
+    void setValues(fileArchiver* curr, int versionNo);
 public slots:
     void openFile(); 
     void pressOK();
 private:
     Ui::retrieveVersion widget;
     const char* strName;
+    std::string filename;
+    fileArchiver* db;
+    int versNo;
 };
 
 #endif	/* _RETRIEVEVERSION_H */

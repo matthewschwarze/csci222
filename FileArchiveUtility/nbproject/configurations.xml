@@ -16,6 +16,7 @@
       <itemPath>commentDialog.h</itemPath>
       <itemPath>getCommentForm.h</itemPath>
       <itemPath>retrieveVersion.h</itemPath>
+      <itemPath>saveFunc.h</itemPath>
       <itemPath>setReference.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -25,6 +26,7 @@
       <itemPath>commentDialog.ui</itemPath>
       <itemPath>getCommentForm.ui</itemPath>
       <itemPath>retrieveVersion.ui</itemPath>
+      <itemPath>saveFunc.ui</itemPath>
       <itemPath>setReference.ui</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
@@ -42,6 +44,7 @@
       <itemPath>getCommentForm.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
       <itemPath>retrieveVersion.cpp</itemPath>
+      <itemPath>saveFunc.cpp</itemPath>
       <itemPath>setReference.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -88,6 +91,18 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <packaging>
+        <packType>Tar</packType>
+        <additionalOptions>-v -w</additionalOptions>
+        <packFileList>
+          <packFileListElem type="File"
+                            to="${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}"
+                            from="${OUTPUT_PATH}"
+                            perm="755"
+                            owner="root"
+                            group="bin"/>
+        </packFileList>
+      </packaging>
       <item path="FileHash.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FileHash.h" ex="false" tool="3" flavor2="0">
@@ -135,6 +150,12 @@
       <item path="retrieveVersion.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="retrieveVersion.ui" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="saveFunc.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="saveFunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="saveFunc.ui" ex="false" tool="3" flavor2="0">
       </item>
       <item path="setReference.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -214,6 +235,12 @@
       <item path="retrieveVersion.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="retrieveVersion.ui" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="saveFunc.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="saveFunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="saveFunc.ui" ex="false" tool="3" flavor2="0">
       </item>
       <item path="setReference.cpp" ex="false" tool="1" flavor2="0">
       </item>

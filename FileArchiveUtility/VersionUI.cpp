@@ -7,6 +7,7 @@
 
 #include "VersionUI.h"
 #include "getCommentForm.h"
+#include "saveFunc.h"
 
 VersionUI::VersionUI() {
     widget.setupUi(this);
@@ -14,37 +15,34 @@ VersionUI::VersionUI() {
     versionBox = new retrieveVersion();
     referenceBox = new setReference();
     commentGet = new getCommentForm();
+    saveBox = new saveFunc();
     
     try {
         db = new fileArchiver();
         std::cout << "connected ok" << std::endl;
         std::string tmp = "commentDialog.cpp";
         
-        vector<VersionRec>* vers= new vector<VersionRec>;
-        (*vers) = db->getVersioninfo(tmp);
+        vers=new vector<VersionRec>;
+        (*vers)=db->getVersioninfo(tmp);
+        
+        fileName="commentDialog.cpp";
         
         
         //make the table to display
-        createTable(vers);
+        //createTable(); //this is a function that is uncommented when testing relating to referencing and versions
         
         //when the buttons are pressed, open their respective UIs and functions
         connect(widget.browseButton, SIGNAL(clicked()), this, SLOT(openFile()));    //open up the native browser to select a file
-        commentBox = new commentDialog(db, fileName);
-        connect(widget.commentButton, SIGNAL(clicked()), commentBox, SLOT(exec())); //open commentDialog.ui's UI
-        connect(widget.historyButton, SIGNAL(clicked()), versionBox, SLOT(exec())); //open retrieveVersion.ui's UI
-        connect(widget.refButton, SIGNAL(clicked()), referenceBox, SLOT(exec()));   //open setReference.ui's UI
+        commentBox = new commentDialog(db, fileName, versNo);
+        connect(widget.commentButton, SIGNAL(clicked()), this, SLOT(showComment())); //open commentDialog.ui's UI
+        connect(widget.historyButton, SIGNAL(clicked()), this, SLOT(getVers())); //open retrieveVersion.ui's UI
+        connect(widget.refButton, SIGNAL(clicked()), this, SLOT(setRef()));   //open setReference.ui's UI
+        connect(widget.saveButton, SIGNAL(clicked()), this, SLOT(saveFile()));   //open the save function and the UI for it
+        connect(widget.tableView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(itemSelection(const QModelIndex &)));
 
     } catch (const mongo::DBException &e) {
         std::cout << "caught " << e.what() << std::endl;
     }
-    
-    
-  
-    
-    //what happens when save is pressed
-    //connect(widget.saveButton, SIGNAL(clicked()), this, SLOT(exec()));
-    
-    //the main database stuff
 
 }
 
@@ -57,10 +55,8 @@ void VersionUI::openFile(){
         filenames = dialog.selectedFiles();
     
     //go ahead and get the comment
-    commentGet->exec(); 
-    //const char* comm = commentGet->get();
+    commentGet->exec();
     string comment = commentGet->get();
-    std::cout << comment << std::endl;
     
     //change the filename to a const char* for transferral to a string
     const char* fileN = filenames[0].toStdString().c_str();
@@ -68,7 +64,6 @@ void VersionUI::openFile(){
     fileName=fname;
     
     //send the file and the comment to fileArchiver
-    std::cout << "Filename: " << fileName << "\tComment: " << comment << std::endl;
     if(db->exists(fileName)){
         if(db->differs(fileName)){
             db->update(fileName, comment); //there are differences so create a new version
@@ -80,30 +75,74 @@ void VersionUI::openFile(){
         db->insertNew(fileName, comment); //no other files by this name
     }
     
-    widget.fileLine->setText(fileN);
+    widget.fileLine->setText(filenames[0]);
+    
+    (*vers)=db->getVersioninfo(fileName);
+    createTable();
 }
 
-void VersionUI::createTable(vector<VersionRec>* vers){
+void VersionUI::createTable(){
     
-    //I think the way I am doing it is wrong: it needs to show after a file is selected
+    //Create a table, populate it with data using addTheData and setModel functions, and then resize the table and display it
     
-    archiveTableView myTable(0);
-    myTable.addTheData(vers);
-    widget.tableView->setModel(&myTable);
+    archiveTableView* myTable = new archiveTableView(0);
+    myTable->addTheData(vers);
+    widget.tableView->setModel(myTable);
     widget.tableView->resizeRowsToContents();
+    widget.tableView->resizeColumnsToContents();
     widget.tableView->show();
-    
-    for(vector<VersionRec>::iterator it = (*vers).begin(); it != (*vers).end(); ++it)
-        cout << (*it).getVersionNumber() << " " << (*it).getLength() << " " << (*it).getModifyTime().tv_sec << endl;
 }
 
 void VersionUI::saveFile(){
-    VersionRec VR;
-    //get the most recent version of the file and save it in the VR might be the best way
-    //then we'll have to compare the versions... I assume we'll have to compare the sizes, though that's really not accurate
-    //but maybe we could compare hashes, that may be the way, especially if the same content creates the same hash
+    
+    //checks to see if the version and the file is the same
     //if they are the same, don't save
     //if they aren't, save and store it as a version
+    
+    if (db->differs(fileName)==true){
+        const char* message = "Save successful.";
+        saveBox->setMessage(message);
+        db->update(fileName, ""); //there are differences so create a new version
+    } else {
+        const char* message = "The files are the same. No need to save.";
+        saveBox->setMessage(message);
+    }
+    saveBox->exec();
+
+}
+
+void VersionUI::itemSelection(const QModelIndex& index){
+    //just a function that gets the row of whatever is highlighted
+    VersionRec p=vers->at(index.row());
+    versNo = p.getVersionNumber();
+}
+
+void VersionUI::showComment(){
+    
+    //below here, the class should get the comment stored in fileArchiver, convert it into a QTextDocument, and display it
+    
+    QString comm = db->getComment(fileName, versNo).c_str();
+    
+    commentBox->setComment(comm);
+    
+    commentBox->exec();
+}
+
+void VersionUI::setRef(){
+    //executes the reference and see if the user actually wanted to set it. If so, then delete old records.
+    referenceBox->exec();
+    if (referenceBox->isOk()==true){
+        string tempComm = db->getComment(fileName, versNo);
+        db->setReference(fileName, versNo, tempComm);
+        (*vers)=db->getVersioninfo(fileName);
+        createTable();
+    }
+}
+
+void VersionUI::getVers(){
+    //call the function in retrieveVersion that copies the file into the named file
+    versionBox->setValues(db, versNo);
+    versionBox->exec();
 }
 
 VersionUI::~VersionUI() {

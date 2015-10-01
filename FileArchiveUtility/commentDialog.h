@@ -15,8 +15,9 @@
 class commentDialog : public QDialog {
     Q_OBJECT
 public:
-    commentDialog(fileArchiver*&, std::string&);
+    commentDialog(fileArchiver*&, std::string&, int);
     virtual ~commentDialog();
+    void setComment(QString &qS);
 private:
     Ui::commentDialog widget;
     QString comment;

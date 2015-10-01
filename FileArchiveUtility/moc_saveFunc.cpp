@@ -1,15 +1,15 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'commentDialog.h'
+** Meta object code from reading C++ file 'saveFunc.h'
 **
-** Created: Thu Oct 1 14:44:35 2015
+** Created: Thu Oct 1 14:44:41 2015
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "commentDialog.h"
+#include "saveFunc.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'commentDialog.h' doesn't include <QObject>."
+#error "The header file 'saveFunc.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63
 #error "This file was generated using the moc from 4.8.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -17,7 +17,7 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_commentDialog[] = {
+static const uint qt_meta_data_saveFunc[] = {
 
  // content:
        6,       // revision
@@ -33,11 +33,11 @@ static const uint qt_meta_data_commentDialog[] = {
        0        // eod
 };
 
-static const char qt_meta_stringdata_commentDialog[] = {
-    "commentDialog\0"
+static const char qt_meta_stringdata_saveFunc[] = {
+    "saveFunc\0"
 };
 
-void commentDialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void saveFunc::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -45,33 +45,33 @@ void commentDialog::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData commentDialog::staticMetaObjectExtraData = {
+const QMetaObjectExtraData saveFunc::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject commentDialog::staticMetaObject = {
-    { &QDialog::staticMetaObject, qt_meta_stringdata_commentDialog,
-      qt_meta_data_commentDialog, &staticMetaObjectExtraData }
+const QMetaObject saveFunc::staticMetaObject = {
+    { &QDialog::staticMetaObject, qt_meta_stringdata_saveFunc,
+      qt_meta_data_saveFunc, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &commentDialog::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &saveFunc::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *commentDialog::metaObject() const
+const QMetaObject *saveFunc::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *commentDialog::qt_metacast(const char *_clname)
+void *saveFunc::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_commentDialog))
-        return static_cast<void*>(const_cast< commentDialog*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_saveFunc))
+        return static_cast<void*>(const_cast< saveFunc*>(this));
     return QDialog::qt_metacast(_clname);
 }
 
-int commentDialog::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int saveFunc::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QDialog::qt_metacall(_c, _id, _a);
     if (_id < 0)

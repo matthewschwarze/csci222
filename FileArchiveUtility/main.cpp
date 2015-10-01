@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
 
+    //In the voice of Bruce Buffer, "IT'S TIME!"
+    //this will initiate VersionUI which starts the UI and the program
     VersionUI mainScr;
     mainScr.show();
 
