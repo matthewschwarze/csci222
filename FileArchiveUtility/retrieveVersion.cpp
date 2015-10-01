@@ -20,7 +20,7 @@ retrieveVersion::retrieveVersion() {
 void retrieveVersion::openFile(){
     //get the filename
     QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setFileMode(QFileDialog::Directory);
     dialog.setViewMode(QFileDialog::Detail);
     QStringList filenames;
     if (dialog.exec())
@@ -29,22 +29,24 @@ void retrieveVersion::openFile(){
     widget.fileRow->setText(filenames[0].toStdString().c_str());
     //set the filename to "filename"
     std::string tempStr(filenames[0].toStdString().c_str());
-    filename=tempStr;    
+    dirPath=tempStr;    
 }
 
 void retrieveVersion::pressOK(){
     QString name = widget.nameRow->text();
     strName = name.toStdString().c_str();
+    std::string wholePath = dirPath + "/" + strName;
     
     //Copy the file on OK
-    db->retriveVersion(versNo, filename, strName);
+    db->retriveVersion(versNo, filename, wholePath);
     
     accept();
 }
 
-void retrieveVersion::setValues(fileArchiver* curr, int versionNo){
+void retrieveVersion::setValues(fileArchiver* curr, int versionNo, std::string fname){
     db=curr;
     versNo=versionNo;
+    filename = fname;
 }
 
 retrieveVersion::~retrieveVersion() {

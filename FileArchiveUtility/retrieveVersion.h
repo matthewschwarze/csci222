@@ -20,7 +20,7 @@ class retrieveVersion : public QDialog {
 public:
     retrieveVersion();
     virtual ~retrieveVersion();
-    void setValues(fileArchiver* curr, int versionNo);
+    void setValues(fileArchiver* curr, int versionNo, std::string fname);
 public slots:
     void openFile(); 
     void pressOK();
@@ -28,6 +28,7 @@ private:
     Ui::retrieveVersion widget;
     const char* strName;
     std::string filename;
+    std::string dirPath;
     fileArchiver* db;
     int versNo;
 };

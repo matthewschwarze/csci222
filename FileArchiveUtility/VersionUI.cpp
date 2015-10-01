@@ -132,8 +132,8 @@ void VersionUI::setRef(){
     //executes the reference and see if the user actually wanted to set it. If so, then delete old records.
     referenceBox->exec();
     if (referenceBox->isOk()==true){
-        string tempComm = db->getComment(fileName, versNo);
-        cout << versNo << endl;
+        commentGet->exec();
+        string tempComm = commentGet->get();
         db->setReference(fileName, versNo, tempComm);
         (*vers)=db->getVersioninfo(fileName);
         createTable();
@@ -142,7 +142,7 @@ void VersionUI::setRef(){
 
 void VersionUI::getVers(){
     //call the function in retrieveVersion that copies the file into the named file
-    versionBox->setValues(db, versNo);
+    versionBox->setValues(db, versNo, fileName);
     versionBox->exec();
 }
 

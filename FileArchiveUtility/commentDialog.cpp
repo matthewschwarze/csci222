@@ -11,6 +11,7 @@ commentDialog::commentDialog(fileArchiver* &db, std::string &filename, int versN
     widget.setupUi(this);
     
     connect(widget.okButton, SIGNAL(clicked()), this, SLOT(close()));
+
 }
 
 void commentDialog::setComment(QString &qS){
