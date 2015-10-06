@@ -108,6 +108,9 @@ void VersionUI::saveFile(){
         saveBox->setMessage(message);
     }
     saveBox->exec();
+    
+    (*vers)=db->getVersioninfo(fileName);
+    createTable();
 
 }
 
